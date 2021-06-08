@@ -1,0 +1,59 @@
+<nav class="navbar navbar-light " style="background-color: #e3f2fd;">
+    <a class="navbar-brand">Ticket Booking</a>
+    <% if user_signed_in? %>
+        <form class="form-inline nav-item nav-link mr-sm-2">
+        	<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
+        	 balance:<%= current_user.user_wallet.balance %> &nbsp
+        	&nbsp<strong><%= current_user.email %></strong>&nbsp
+          &nbsp<%= link_to " Edit profile", edit_user_registration_path %>&nbsp
+          &nbsp<%= link_to " logout", destroy_user_session_path, method: :delete %>
+        </form>
+    <% else %>
+        <form class="form-inline">
+            <a class="nav-item nav-link mr-sm-2" href="/admins/sign_in">Admin Login</a>
+            <a class="nav-item nav-link mr-sm-2" href="/users/sign_in">User Login</a>
+            <a class="nav-item nav-link mr-sm-2" href="/users/sign_up">Register</a>
+        </form>
+    <% end %>
+</nav>
+<center>
+	<h1>search result</h1>
+    <table class= "myTable" style="width: 50%">
+      <tr>
+        <th>available buses</th>
+        <th>date</th>
+        <th>Time</th>
+        <th>start from</th>
+        <th>destination</th>
+        <th>book</th>
+      </tr>
+      <tr>
+      	<% @buses.each do |bus| %>
+        <td><%= bus.bus_no %></td>
+       <td><%= bus.travel_date %></td>
+       <td><%= bus.start_time %></td>
+       <td><%= bus.start_point %></td>
+      <td><%= bus.end_point %></td>
+       <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+      </tr>
+      <% end %>
+   </table> 
+</center>
+<style>
+.myTable { 
+  width: 100%;
+  text-align: left;
+  background-color: white;
+  border-collapse: collapse; 
+  }
+.myTable th { 
+  background-color: lightgreen;
+  color: salmon; 
+  }
+.myTable td, 
+.myTable th { 
+  padding: 10px;
+  border: 1px solid black; 
+  }
+  tr:nth-child(even) {background-color: #F0ffff;}
+</style>

@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user_id: 1
+  regervation_id: 1
+  amount: 1.5
+  payment_status: MyString
+  ref_id: MyString
+
+two:
+  user_id: 1
+  regervation_id: 1
+  amount: 1.5
+  payment_status: MyString
+  ref_id: MyString

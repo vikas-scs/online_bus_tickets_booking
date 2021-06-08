@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  bus_id: 1
+  user_id: 1
+  seat_no: 
+  fare: 1.5
+  admin_id: 1
+
+two:
+  bus_id: 1
+  user_id: 1
+  seat_no: 
+  fare: 1.5
+  admin_id: 1
