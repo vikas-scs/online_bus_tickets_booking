@@ -8,7 +8,6 @@ class ReservationController < ApplicationController
 		@reservation.user_id = @user.id
 		@reservation.seat_no = rand(1..35)
 		@reservation.fare = @bus.fare
-		@reservation.admin_id = @bus.admin_id
 		@reservation.Reserve_status = "pending"
 		@reservation.save		
 	end
@@ -87,7 +86,7 @@ class ReservationController < ApplicationController
    	  	@amount = (@reservation.fare * @refund.percentage) / 100
    	  	@total = @reservation.fare - @amount
    	  	@statement.refund_amount = @total
-
+   	  	@total = @wallet.balance + @total
    	  	Wallet.transaction do 
         @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
            @wallet.with_lock do
@@ -106,6 +105,7 @@ class ReservationController < ApplicationController
    	  	@total = @reservation.fare - @amount
    	  	@statement.refund_amount = @total
    	  	@statement.ref_id = rand(7 ** 7)
+   	  	@total = @wallet.balance + @total
    	  	Wallet.transaction do 
         @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
            @wallet.with_lock do
@@ -123,6 +123,8 @@ class ReservationController < ApplicationController
         @amount = (@reservation.fare * @refund.percentage) / 100
    	  	@total = @reservation.fare - @amount
    	  	@statement.refund_amount = @total
+   	  	
+   	  	@total = @wallet.balance + @total
    	  	@statement.ref_id = rand(7 ** 7)
    	  	Wallet.transaction do 
         @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
@@ -141,6 +143,7 @@ class ReservationController < ApplicationController
    	    @amount = (@reservation.fare * @refund.percentage) / 100
    	  	@total = @reservation.fare - @amount
    	  	@statement.refund_amount = @total
+   	  	@total = @wallet.balance + @total
    	  	@statement.ref_id = rand(7 ** 7)
    	  	Wallet.transaction do 
         @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
