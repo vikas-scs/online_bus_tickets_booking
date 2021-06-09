@@ -2,8 +2,8 @@
     <a class="navbar-brand">Ticket Booking</a>
     <% if user_signed_in? %>
         <form class="form-inline nav-item nav-link mr-sm-2">
-          <%= link_to "Home", root_path %>&nbsp
-          &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
+          <%= link_to "My Reservations", my_reservations_path %>
+        	<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
         	 balance:<%= current_user.wallet.balance %> &nbsp
         	&nbsp<strong><%= current_user.email %></strong>&nbsp
           &nbsp<%= link_to " Edit profile", edit_user_registration_path %>&nbsp
@@ -18,32 +18,8 @@
     <% end %>
 </nav>
 <section style="height:100vh; background-size: cover; background-image: url(https://r8a5m2f2.stackpathcdn.com/wp-content/uploads/2016/12/BUS-Ticketing-Management.jpg);">
-<div style="float: left; padding-left: 20%;">
-	<h1>seats available</h1>
-    <center><h2><%= @seats.total_seats %></h2></center>
-      <center><h4>seat fare:<%= @seats.fare %></h4></center>
-      <%= form_tag(seats_path, :method => "get") do %>
-      <%= hidden_field_tag :"bus_id", @seats.id %>
-      <center><%= submit_tag "Book Now",class: "btn btn-success" %></center>
-      <% end %>
-      <center><%= link_to "Back", search_bus_path(id: @seats.id) %></center>
-</div>
-<style>
-.myTable { 
-  width: 100%;
-  text-align: left;
-  background-color: white;
-  border-collapse: collapse; 
-  }
-.myTable th { 
-  background-color: lightgreen;
-  color: salmon; 
-  }
-.myTable td, 
-.myTable th { 
-  padding: 10px;
-  border: 1px solid black; 
-  }
-  tr:nth-child(even) {background-color: #F0ffff;}
-</style>
+  <div style="float: left; padding-left: 10%;">
+   <h1>ticket cancelled successfully</h1><br>
+     <center><%= link_to "Back", my_reservations_path %></center>
+ </div>
 </section>

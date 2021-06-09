@@ -4,4 +4,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
   has_one :wallet
+  has_many :reservations
+  has_many :statements
+  has_many :payments
 end

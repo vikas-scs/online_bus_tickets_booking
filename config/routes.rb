@@ -6,6 +6,14 @@ Rails.application.routes.draw do
   get "bus/search", to:"bus#search", as: :search_bus
   get "bus/book/id", to:"bus#book", as: :book
   get "wallet/index", to:"wallet#index", as: :wallets
-  # get "bus/seats/id", to:"bus#seats", as: :seats
+  get "bus/seats", to:"bus#seats", as: :seats
+  get "wallet/:id", to:"wallet#new", as: :new_wallet
+  post 'wallet/:id', to: 'wallet#create'
+  get 'reservation/index', to:'reservation#index', as: :reservation
+  get 'reservation/payment', to:'reservation#payment', as: :payment
+  get 'reservation/show', to:'reservation#show', as: :my_reservations
+  get 'reservation/cancel', to:'reservation#cancel', as: :cancel
+  get 'reservation/cancelled', to:'reservation#cancelled', as: :cancel_ticket
+
   # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end

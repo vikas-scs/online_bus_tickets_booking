@@ -2,8 +2,8 @@
     <a class="navbar-brand">Ticket Booking</a>
     <% if user_signed_in? %>
         <form class="form-inline nav-item nav-link mr-sm-2">
-          <%= link_to "Home", root_path %>&nbsp
-          &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
+            <%= link_to "Home", root_path %>&nbsp
+            &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
         	 balance:<%= current_user.wallet.balance %> &nbsp
         	&nbsp<strong><%= current_user.email %></strong>&nbsp
           &nbsp<%= link_to " Edit profile", edit_user_registration_path %>&nbsp
@@ -17,17 +17,37 @@
         </form>
     <% end %>
 </nav>
-<section style="height:100vh; background-size: cover; background-image: url(https://r8a5m2f2.stackpathcdn.com/wp-content/uploads/2016/12/BUS-Ticketing-Management.jpg);">
-<div style="float: left; padding-left: 20%;">
-	<h1>seats available</h1>
-    <center><h2><%= @seats.total_seats %></h2></center>
-      <center><h4>seat fare:<%= @seats.fare %></h4></center>
-      <%= form_tag(seats_path, :method => "get") do %>
-      <%= hidden_field_tag :"bus_id", @seats.id %>
-      <center><%= submit_tag "Book Now",class: "btn btn-success" %></center>
+<center>
+    <h1>My Reservations</h1>
+    <table class= "myTable" style="width: 50%">
+      <tr>
+        <th>Reservation Id</th>
+        <th>Bus Id</th>
+        <th>Fare</th>
+        <th>Status</th>
+        <th>Pay</th>
+        <th>cancel</th>
+      </tr>
+      <tr>
+        <% @reservations.each do |bus| %>
+        <td><%= bus.id %></td>
+       <td><%= bus.bus_id %></td>
+       <td><%= bus.fare %></td>
+       <td><%= bus.Reserve_status %></td>
+       <% if bus.Reserve_status == "pending" %>
+        <td><%= link_to 'pay', payment_path(id: bus.id) %></td>
+        <td></td>
+       <% elsif bus.Reserve_status == "cancelled" %>
+       <td>refunded</td>
+       <td>cancelled</td>
+       <% else %>
+       <td>paid</td>
+       <td><%= link_to 'cancel', cancel_path(id: bus.id) %></td>
+       <% end %>
+      </tr>
       <% end %>
-      <center><%= link_to "Back", search_bus_path(id: @seats.id) %></center>
-</div>
+   </table> 
+</center>
 <style>
 .myTable { 
   width: 100%;
@@ -46,4 +66,3 @@
   }
   tr:nth-child(even) {background-color: #F0ffff;}
 </style>
-</section>

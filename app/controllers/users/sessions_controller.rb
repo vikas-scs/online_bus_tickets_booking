@@ -5,6 +5,7 @@ class Users::SessionsController < Devise::SessionsController
 
   # GET /resource/sign_in
   def new
+    self.resource = resource_class.new(sign_in_params)
     puts params.inspect
     puts params[:id]
     puts "hello"
@@ -17,18 +18,24 @@ class Users::SessionsController < Devise::SessionsController
 
   # POST /resource/sign_in
   def create
-    puts params[:id]
-    if params[:id].present?
-      redirect_to book_path(id: params[:id])
+    puts params[:user]
+    puts params[:user][:id]
+    self.resource = warden.authenticate!(auth_options)
+    set_flash_message!(:notice, :signed_in)
+    sign_in(resource_name, resource)
+    if params[:user][:id].present?
+      puts "hello00000oooooooooo" 
+      redirect_to book_path(id: params[:user][:id])
     else
-     super
-   end
+      yield resource if block_given?
+      respond_with resource, location: after_sign_in_path_for(resource)
+    end
   end
 
   # DELETE /resource/sign_out
-  def destroy
-    super
-  end
+  # def destroy
+  #   super
+  # end
 
   # protected
 

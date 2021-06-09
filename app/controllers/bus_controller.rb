@@ -4,9 +4,12 @@ class BusController < ApplicationController
 	end
 	def search
 		puts params.inspect
-		@buses = Bus.where(start_point: params[:s_point],end_point: params[:e_point],status: "Available", travel_date: params[:date])
-		puts @buses
-		puts "hello"
+		if params[:id].present?
+			@bus = Bus.find(params[:id])
+			@buses = Bus.where(start_point: @bus.start_point,end_point: @bus.end_point,status: "Available", travel_date: @bus.travel_date)
+		else
+		   @buses = Bus.where(start_point: params[:s_point],end_point: params[:e_point],status: "Available", travel_date: params[:date])
+		end
 	end
 	def book
 		if !user_signed_in?
@@ -16,6 +19,8 @@ class BusController < ApplicationController
 		@seats = Bus.find(params[:id])		
 	end
 	def seats
+		puts params.inspect
+		@bus = Bus.find(params[:bus_id])
 		
 	end
 end
