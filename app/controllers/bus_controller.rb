@@ -4,10 +4,7 @@ class BusController < ApplicationController
 	end
 	def search
 		puts params.inspect
-		if params[:id].present?
-			@bus = Bus.find(params[:id])
-			@buses = Bus.where(start_point: @bus.start_point,end_point: @bus.end_point)
-		elsif !params[:s_point].present? && !params[:e_point].present? && !params[:date].present?
+		if !params[:s_point].present? && !params[:e_point].present? && !params[:date].present?
             	flash[:notice] = "please enter source and destination"
 				redirect_to root_path
 		else

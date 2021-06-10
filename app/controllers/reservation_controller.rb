@@ -32,7 +32,6 @@ class ReservationController < ApplicationController
     @statement1 = Statement.new
    	@statement.transaction_type = "credit"
     @statement1.transaction_type = "credit"
-   	@reservation.save
     @fare = @bus.fare * params[:select_seats].to_i 
    	@statement.user_id = @user.id
     @statement.admin_id = @bus.admin_id
@@ -40,22 +39,17 @@ class ReservationController < ApplicationController
     @statement1.admin_id = @bus.admin_id
     @statement.ref_id = rand(7 ** 7)
     @statement1.ref_id = rand(7 ** 7)
-   	UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).cancel_email.deliver_now
-   	if @day < 2
-      @statement.refund_amount = 0
-      @statement1.refund_amount = @fare
-   	  @reservation.fare = @reservation.fare - @fare
-      @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
-      @reservation.save
-      @statement.remaining_balance = @wallet.balance
-      @statement1.remaining_balance = @admin.wallet
-      @statement.save
-      @statement1.save
-   	elsif @day == 3
+    @cancel_fee = CancelFee.find(1)
+   	if @day < 3
+      flash[:notice] = "can't cancel ticket in less then 3 days!!!so plaese enjoy journey"
+      redirect_to my_reservations_path
+      return
+   	end
+    @reservation.save
+    UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).cancel_email.deliver_now
+    if @day == 3
    	  puts " 3 days "
-   	  @refund = Refund.where(days: 3).first
-   	  
-   	  @amount = (@fare * @refund.percentage) / 100
+   	  @amount = (@fare * @cancel_fee.hrs_72) / 100
       @statement1.refund_amount = @amount
       Admin.transaction do 
         @admin = Admin.first                                   #locking the transaction for avoiding deadlocks
@@ -86,8 +80,7 @@ class ReservationController < ApplicationController
    	  end
    	elsif @day > 3 && @day <= 5
    	 	puts " 4 to 5 days"
-   	 	@refund = Refund.where(days: 5).first
-      @amount = (@fare * @refund.percentage) / 100
+      @amount = (@fare * @cancel_fee.days_5) / 100
       @statement1.refund_amount = @amount
       Admin.transaction do 
         @admin = Admin.first                                   #locking the transaction for avoiding deadlocks
@@ -118,8 +111,7 @@ class ReservationController < ApplicationController
    	  end
    	elsif @day > 5 && @day <= 7
    	 	puts "6 to 7 days"
-   	 	@refund = Refund.where(days: 5).first
-      @amount = (@fare * @refund.percentage) / 100
+      @amount = (@fare * @cancel_fee.days_7) / 100
       @statement1.refund_amount = @amount
       Admin.transaction do 
         @admin = Admin.first                                   #locking the transaction for avoiding deadlocks
@@ -148,10 +140,9 @@ class ReservationController < ApplicationController
    	      @payment.save
    	    end
    	  end
-   	elsif @day > 7 && @dat < 10
+   	elsif @day > 7 && @dat <= 10
    		puts "8 to 10 days"
-   		@refund = Refund.where(days: 7).first
-   	  @amount = (@fare * @refund.percentage) / 100
+   	  @amount = (@fare * @cancel_fee.days_10) / 100
       @statement1.refund_amount = @amount
       Admin.transaction do 
         @admin = Admin.first                                   #locking the transaction for avoiding deadlocks
@@ -180,7 +171,7 @@ class ReservationController < ApplicationController
    	      @payment.save
    	    end
    	  end
-   	elsif @day >= 10
+   	elsif @day > 10
    	  puts "no fee"
    	  @statement.refund_amount = @fare
    	  @total = @wallet.balance + @reservation.fare

@@ -1,0 +1,2 @@
+class CancelFee < ApplicationRecord
+end
