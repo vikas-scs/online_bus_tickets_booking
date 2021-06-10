@@ -7,6 +7,9 @@ class BusController < ApplicationController
 		if params[:id].present?
 			@bus = Bus.find(params[:id])
 			@buses = Bus.where(start_point: @bus.start_point,end_point: @bus.end_point)
+		elsif !params[:s_point].present? && !params[:e_point].present? && !params[:date].present?
+            	flash[:notice] = "please enter source and destination"
+				redirect_to root_path
 		else
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
 		   	   @upcase1 = params[:s_point].upcase
@@ -38,11 +41,13 @@ class BusController < ApplicationController
 		if params[:no_seats] == "" 
 			flash[:notice] = "please enter no.of seats"
 			redirect_to book_path(id: params[:bus_id])
+			return
 		end
 		@bus = Bus.find(params[:bus_id])
 		if @bus.total_seats < params[:no_seats].to_i
 			flash[:notice] = "please enter seats count below #{@bus.total_seats}"
 			redirect_to book_path(id: params[:bus_id])
+			return
         end
         @reservation = Reservation.new
         @reservation.bus_id = @bus.id
@@ -50,6 +55,7 @@ class BusController < ApplicationController
 		@bus.total_seats = @available
 		@statement = Statement.new
 		@statement.user_id = current_user.id
+		@statement.admin_id = @bus.admin_id
 		@statement.transaction_type = "debit"
 		@statement.amount = @bus.fare * params[:no_seats].to_i
 		@statement.ref_id = rand(7 ** 7)

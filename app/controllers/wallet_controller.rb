@@ -3,7 +3,8 @@ class WalletController < ApplicationController
 		@user = current_user
 	end
 	def new
-      @wallet = Wallet.find(params[:id])
+      @user = current_user
+      @wallet = @user.wallet
     end
     def create
     	@statement = Statement.new                              #creating statement when the user adding money to the wallet
