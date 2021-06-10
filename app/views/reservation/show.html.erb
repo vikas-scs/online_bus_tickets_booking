@@ -23,6 +23,7 @@
       <tr>
         <th>Reservation Id</th>
         <th>Bus Id</th>
+        <th>no.of seats</th>
         <th>Fare</th>
         <th>Status</th>
         <th>Pay</th>
@@ -32,6 +33,7 @@
         <% @reservations.each do |bus| %>
         <td><%= bus.id %></td>
        <td><%= bus.bus_id %></td>
+       <td><%= bus.no_seats %></td>
        <td><%= bus.fare %></td>
        <td><%= bus.Reserve_status %></td>
        <% if bus.Reserve_status == "pending" %>
@@ -42,7 +44,7 @@
        <td>cancelled</td>
        <% else %>
        <td>paid</td>
-       <td><%= link_to 'cancel', cancel_path(id: bus.id) %></td>
+       <td><%= link_to 'cancel', cancel_path(id: bus.payment_id) %></td>
        <% end %>
       </tr>
       <% end %>

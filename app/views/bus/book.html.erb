@@ -24,6 +24,7 @@
       <center><h4>seat fare:<%= @seats.fare %></h4></center>
       <%= form_tag(seats_path, :method => "get") do %>
       <%= hidden_field_tag :"bus_id", @seats.id %>
+      no.of seats:<%= text_field_tag :"no_seats" %><br>
       <center><%= submit_tag "Book Now",class: "btn btn-success" %></center>
       <% end %>
       <center><%= link_to "Back", search_bus_path(id: @seats.id) %></center>

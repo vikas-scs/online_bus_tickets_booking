@@ -3,7 +3,7 @@ class UserMailer < ApplicationMailer
 
   def confimation_email
     @user = User.find(params[:user_id])
-    @payment = Payment.find(params[:payment_id])
+    @reservation = Reservation.find(params[:reservation_id])
     mail(to: @user.email, subject: 'ticket confirmation')
   end
   def cancel_email

@@ -21,9 +21,10 @@
   <div style="float: left; padding-left: 10%;">
    <h1>Are you sure do you want to cancel?</h1><br>
    <%= form_tag(cancel_ticket_path, :method => "get") do %>
-      <%= hidden_field_tag :"reservation_id", @rid %>
+      <%= hidden_field_tag :"reservation_id", @reservation.id %>
       <%= hidden_field_tag :"payment_id", @payment.id %>
-      <%= submit_tag "Cancel Ticket",class: "btn btn-danger" %>
+      Seats:<%= text_field_tag :"select_seats", @reservation.no_seats %>
+      <%= submit_tag "Cancel Tickets",class: "btn btn-danger" %>
       <% end %>
      <center><%= link_to "Back", my_reservations_path %></center>
  </div>

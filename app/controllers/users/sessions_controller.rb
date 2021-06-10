@@ -27,7 +27,7 @@ class Users::SessionsController < Devise::SessionsController
       puts "hello00000oooooooooo" 
       redirect_to book_path(id: params[:user][:id])
     else
-      yield resource if block_given?
+      
       respond_with resource, location: after_sign_in_path_for(resource)
     end
   end

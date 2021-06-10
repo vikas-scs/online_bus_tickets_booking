@@ -6,9 +6,8 @@
   <body>
     <h1>Welcome Mr. <%= @user.email %></h1>
     <p>
-      You have successfully paid amount for ticket,
-      your amount is : <%= @payment.amount %><br>
-      track your bus with:<%= @payment.ref_id %>
+      You have successfully paid amount for ticket : <%=@reservation.no_seats %>,
+      your amount is : <%= @reservation.fare %><br>
     </p>
     <p>Thanks for joining and have a great day!</p>
   </body>

@@ -23,7 +23,7 @@
       <tr>
         <th>available buses</th>
         <th>date</th>
-        <th>Time</th>
+        <th>Travel hrs</th>
         <th>start from</th>
         <th>destination</th>
         <th>book</th>
@@ -32,7 +32,7 @@
       	<% @buses.each do |bus| %>
         <td><%= bus.bus_no %></td>
        <td><%= bus.travel_date %></td>
-       <td><%= bus.start_time %></td>
+       <td><%= bus.travel_hrs %></td>
        <td><%= bus.start_point %></td>
       <td><%= bus.end_point %></td>
        <td><%= link_to 'book', book_path(:id => bus.id) %></td>
