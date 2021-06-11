@@ -9,7 +9,9 @@ class BusController < ApplicationController
 				redirect_to root_path
 		else
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
-		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%","%#{params[:date]}%")
+		    	@buses = Bus.where(start_point: params[:s_point], end_point: params[:e_point], travel_date: params[:date])
+		    elsif params[:s_point].present? && params[:e_point].present?	
+		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%")
 		    elsif params[:s_point].present?
 		       @buses = Bus.where('lower(start_point) = ?', params[:s_point].downcase)
 		    elsif params[:e_point].present?	
@@ -51,7 +53,7 @@ class BusController < ApplicationController
 		@statement.admin_id = 1
 		@statement.transaction_type = "debit"
 		@statement.amount = @bus.fare * params[:no_seats].to_i
-		@statement.ref_id = rand(7 ** 7)
+		@statement.ref_id = "res#{rand(7 ** 7)}"
 		@payment = Payment.new
 		@user = current_user
 		@wallet = @user.wallet
@@ -66,14 +68,13 @@ class BusController < ApplicationController
 		@payment.user_id = @user.id
 		@cutoff = @wallet.balance - @statement.amount
 		@payment.payment_status = "success"
-		Wallet.transaction do 
-           @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
+		@wallet.transaction do                                    #locking the transaction for avoiding deadlocks
            @wallet.with_lock do
                @wallet.balance = @cutoff
                @wallet.save
                @statement.remaining_balance = @wallet.balance
                @payment.amount = @statement.amount
-               @payment.ref_id = rand(7 ** 7)
+               @payment.ref_id = "res#{rand(7 ** 7)}"
                @payment.bus_id = @bus.id
                @payment.save
                @reservation.Reserve_status = "success"

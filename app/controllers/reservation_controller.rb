@@ -9,6 +9,13 @@ class ReservationController < ApplicationController
     @rid = params[:id]
    	@payment = Payment.find(@rid)
     @reservation = Reservation.where(payment_id: @rid).first
+    @bus = Bus.find(@reservation.bus_id)
+    @day = @bus.travel_date - Date.today
+    if @day < 3
+      flash[:notice] = "can't cancel ticket in less then 3 days!!!so plaese enjoy journey"
+      redirect_to my_reservations_path
+      return
+    end
   end
   def cancelled
    	@user = current_user
@@ -41,11 +48,6 @@ class ReservationController < ApplicationController
     @statement.ref_id = "ref#{rand(7 ** 7)}"
     @statement1.ref_id = "fee#{rand(7 ** 7)}"
     @cancel_fee = CancelFee.find(1)
-   	if @day < 3
-      flash[:notice] = "can't cancel ticket in less then 3 days!!!so plaese enjoy journey"
-      redirect_to my_reservations_path
-      return
-   	end
     if @day <= 10
     if @day == 3
    	  @amount = (@fare * @cancel_fee.hrs_72) / 100 
@@ -56,9 +58,8 @@ class ReservationController < ApplicationController
    	elsif @day > 7 && @dat <= 10
    	  @amount = (@fare * @cancel_fee.days_10) / 100
     end
-      @statement1.refund_amount = @amount
-      @admin.transaction do 
-        @admin = Admin.lock("FOR UPDATE NOWAIT").find_by(email: @admin.email )                                   #locking the transaction for avoiding deadlocks
+    @statement1.refund_amount = @amount
+      @admin.transaction do                                    #locking the transaction for avoiding deadlocks
         @admin.with_lock do
           @charge = @amount + @admin.wallet
           @admin.wallet = @charge
@@ -71,8 +72,7 @@ class ReservationController < ApplicationController
       @total = @fare - @amount
    	  @statement.refund_amount = @total
    	  @total = @wallet.balance + @total
-   	  @wallet.transaction do 
-        @wallet = Wallet.lock("FOR UPDATE NOWAIT").find_by(user_id: @wallet.user_id )                                   #locking the transaction for avoiding deadlocks
+   	  @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
           @wallet.balance = @total
           if @wallet.save!
@@ -91,12 +91,10 @@ class ReservationController < ApplicationController
    	  @statement.refund_amount = @fare
    	  @total = @wallet.balance + @reservation.fare
       @statement1.refund_amount = 0
-      @wallet.transaction do 
-        @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
+      @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
           @wallet.balance = @total
           @wallet.save
-          puts @wallet.balance
           @statement.remaining_balance = @wallet.balance
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_is
