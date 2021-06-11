@@ -10,7 +10,7 @@ class WalletController < ApplicationController
     	@statement = Statement.new                              #creating statement when the user adding money to the wallet
        @statement.transaction_type = "credit"
        @statement.user_id = current_user.id
-       @statement.ref_id = rand(7 ** 7)
+       @statement.ref_id = "Add#{rand(7 ** 7)}"
   	   amount = params["balance"].to_f
   	   if amount < 0                                             #the adding money should be greater then 0 
   	    	flash[:notice] = "invalid amount"
@@ -23,7 +23,7 @@ class WalletController < ApplicationController
        @user = User.find(current_user.id)
        @wallet = @user.wallet         
        Wallet.transaction do 
-       @wallet = Wallet.first                                   #locking the transaction for avoiding deadlocks
+       @wallet = Wallet.lock("FOR UPDATE NOWAIT").find_by(user_id: @wallet.user_id)                                   #locking the transaction for avoiding deadlocks
        @wallet.with_lock do
          @wallet.balance = total
          @wallet.save

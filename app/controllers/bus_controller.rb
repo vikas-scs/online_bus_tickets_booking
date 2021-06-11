@@ -9,11 +9,7 @@ class BusController < ApplicationController
 				redirect_to root_path
 		else
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
-		   	   @upcase1 = params[:s_point].upcase
-		   	   @upcase2 = params[:e_point].upcase
-		   	   @down1 = params[:s_point].downcase
-		   	   @down2 = params[:e_point].downcase
-		       @buses = Bus.where(start_point: params[:s_point],start_point: @upcase ,start_point: @down1, end_point: params[:e_point], end_point:@upcase2, end_point: @down2 , travel_date: params[:date])
+		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%","%#{params[:date]}%")
 		    elsif params[:s_point].present?
 		       @buses = Bus.where('lower(start_point) = ?', params[:s_point].downcase)
 		    elsif params[:e_point].present?	
@@ -52,7 +48,7 @@ class BusController < ApplicationController
 		@bus.total_seats = @available
 		@statement = Statement.new
 		@statement.user_id = current_user.id
-		@statement.admin_id = @bus.admin_id
+		@statement.admin_id = 1
 		@statement.transaction_type = "debit"
 		@statement.amount = @bus.fare * params[:no_seats].to_i
 		@statement.ref_id = rand(7 ** 7)
