@@ -21,16 +21,20 @@ class WalletController < ApplicationController
        @statement.amount = amount
   	   a = current_user.wallet.balance
        total = a + amount
-       @user = User.find(current_user.id)
+       @user = current_user
        @wallet = @user.wallet         
        @wallet.transaction do                                   #locking the transaction for avoiding deadlocks
        @wallet.with_lock do
          @wallet.balance = total
-         @wallet.save
-         @statement.remaining_balance = @wallet.balance
-         @statement.save
+         if @wallet.save!
+            @statement.remaining_balance = @wallet.balance
+            @statement.save
+          end
+
        end
       end
+      puts "helloooo"
+       
       respond_to do |format|
       if @wallet.save
         format.html { redirect_to wallets_path, notice: "money was added successfully." }

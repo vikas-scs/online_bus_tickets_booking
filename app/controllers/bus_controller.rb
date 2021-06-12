@@ -49,30 +49,42 @@ class BusController < ApplicationController
 			redirect_to book_path(id: params[:bus_id])
 			return
         end
+        @admin = Admin.find(1)
         @reservation = Reservation.new
         @reservation.bus_id = @bus.id
 		@available = @bus.total_seats - params[:no_seats].to_i
-		@bus.total_seats = @available
+		@bus.available_seats = @available
 		@statement = Statement.new
+		@statement1 = Statement.new
+		@statement.bus_id = @bus.id
+		@statement1.bus_id = @bus.id
 		@statement.user_id = current_user.id
-		@statement.admin_id = 1
+		@statement1.user_id = current_user.id
+		@statement.admin_id = @admin.id
+		@statement1.admin_id = @admin.id
 		@statement.transaction_type = "debit"
+		@statement1.transaction_type = "credit"
 		@statement.amount = @bus.fare * params[:no_seats].to_i
-		@statement.ref_id = "res#{rand(7 ** 7)}"
-		@payment = Payment.new
+		@statement1.amount = @bus.fare * params[:no_seats].to_i
 		@user = current_user
 		@wallet = @user.wallet
-		@reservation.user_id = @user.id
-		@reservation.no_seats = params[:no_seats].to_i
-		@reservation.fare = @statement.amount
 		if @statement.amount > @wallet.balance
 			flash[:notice] = "insufficient balance, please add money"
 			redirect_to new_wallet_path(id: @user.id)
 			return
 	    end
+		@statement.ref_id = "res#{rand(7 ** 7)}"
+		@statement1.ref_id = "res#{rand(7 ** 7)}"
+		@payment = Payment.new
+		@reservation.user_id = @user.id
+		@reservation.no_seats = params[:no_seats].to_i
+		@reservation.fare = @statement.amount
 	    @statement.description = "Booking tickets"
+	    @statement1.description = "getting money for Booking tickets"
 	    @statement.no_seats = params[:no_seats].to_i
+	    @statement1.no_seats = params[:no_seats].to_i
 	    @statement.seat_fare = @bus.fare
+	    @statement1.seat_fare = @bus.fare
 		@payment.user_id = @user.id
 		@cutoff = @wallet.balance - @statement.amount
 		@payment.payment_status = "success"
@@ -91,13 +103,31 @@ class BusController < ApplicationController
                @statement.reservation_id = @reservation.id
                UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now
                @statement.save
-               if @bus.save
-               	  flash[:notice] = "Booking success"
-			      redirect_to my_reservations_path
-			      return
-	         end
-
+               @bus.save
             end
-        end		
+        end
+        @admin.transaction do 
+           @admin.with_lock do 
+              @add = @admin.wallet + @statement.amount
+              @admin.wallet = @add
+              @admin.save
+                 @statement1.remaining_balance = @admin.wallet
+                 @statement1.reservation_id = @reservation.id
+                 if @statement1.save
+                   flash[:notice] = "booking successful"
+			       redirect_to my_reservations_path
+			     return
+			  end
+			end
+	    end	
+	end
+	def statement
+		@reservation = Reservation.find(params[:id])
+		@statement = @reservation.statements
+	end
+	def statements
+		@user = current_user
+		@statements = @user.statements
+		
 	end
 end

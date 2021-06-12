@@ -39,21 +39,24 @@ class ReservationController < ApplicationController
    	@day = @bus.travel_date - Date.today
    	@statement = Statement.new
     @statement1 = Statement.new
+    @statement.bus_id = @bus.id
+    @statement1.bus_id = @bus.id
    	@statement.transaction_type = "credit"
-    @statement1.transaction_type = "credit"
+    @statement1.transaction_type = "debit"
     @fare = @state.seat_fare * params[:select_seats].to_i 
    	@statement.user_id = @user.id
     @statement.admin_id = @admin.id
     @statement.description = "Adding refund to user"
-    @statement1.description = "Adding refund fee to admin"
+    @statement1.description = "Giving refund amount to user "
     @statement.no_seats = params[:select_seats].to_i
     @statement1.no_seats = params[:select_seats].to_i
     @statement.seat_fare = @state.seat_fare
     @statement1.seat_fare = @state.seat_fare
     @statement1.user_id = @user.id
+    @statement.user_id = @user.id
     @statement1.admin_id = @admin.id
     @statement.ref_id = "ref#{rand(7 ** 7)}"
-    @statement1.ref_id = "fee#{rand(7 ** 7)}"
+    @statement1.ref_id = "ref#{rand(7 ** 7)}"
     @cancel_fee = CancelFee.find(1)
     if @day <= 10
     if @day == 3
@@ -65,57 +68,74 @@ class ReservationController < ApplicationController
    	elsif @day > 7 && @dat <= 10
    	  @amount = (@fare * @cancel_fee.days_10) / 100
     end
-    @statement1.refund_amount = @amount
-      @admin.transaction do                                    #locking the transaction for avoiding deadlocks
-        @admin.with_lock do
-          @charge = @amount + @admin.wallet
-          @admin.wallet = @charge
-          if @admin.save!
-            @statement1.remaining_balance = @admin.wallet
-          end
-        end
-      end
-      @total = @fare - @amount
-   	  @statement.refund_amount = @total
-   	  @total = @wallet.balance + @total
+    @refunds = @fare - @amount
+    @statement.refund_amount = @refunds
+   	  @statement1.refund_amount = @refunds
+   	  @user_get = @wallet.balance + @refunds
    	  @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
-          @wallet.balance = @total
+          @wallet.balance = @user_get
           if @wallet.save!
             @statement.remaining_balance = @wallet.balance 
           end
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
+          @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
           @reservation.save
    	      @payment.save
-          @reservation.save
           @statement.reservation_id = @reservation.id
           @statement1.reservation_id = @reservation.id
           @statement.save
-           @statement1.save
+          @bus.save
    	    end
    	  end
+      @admin.transaction do                                    #locking the transaction for avoiding deadlocks
+        @admin.with_lock do
+          @charge =  @admin.wallet  - @amount 
+          @admin.wallet = @charge
+          if @admin.save!
+            @statement1.remaining_balance = @admin.wallet
+            @statement1.save
+            flash[:notice] = "successfully cancelled ticket!!!"
+            redirect_to my_reservations_path
+          end
+        end
+      end
    	  elsif @day > 10
    	  puts "no fee"
    	  @statement.refund_amount = @fare
-   	  @total = @wallet.balance + @reservation.fare
-      @statement1.refund_amount = 0
+      @get = @wallet.balance + @fare
+      @statement1.refund_amount = @fare
+      @admin_get = @admin.wallet - @fare
+      @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
       @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
-          @wallet.balance = @total
-          @wallet.save
-          @statement.remaining_balance = @wallet.balance
+          @wallet.balance = @get
+          if @wallet.save!
+            @statement.remaining_balance = @wallet.balance
+          end
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
           @reservation.save
           @statement.save
-          @statement1.remaining_balance = @admin.wallet
    	      @payment.save
-          @reservation.save
+          @statement.reservation_id = @reservation.id
           @statement1.reservation_id = @reservation.id
-          @statement1.save
+          @statement.save
+          @bus.save
    	    end
    	  end
+      @admin.transaction do                                    #locking the transaction for avoiding deadlocks
+        @admin.with_lock do
+          @admin.wallet = @admin_get
+          if @admin.save!
+            @statement1.remaining_balance = @admin.wallet
+            @statement1.save
+            flash[:notice] = "successfully cancelled ticket!!!"
+            redirect_to my_reservations_path
+          end
+        end
+      end
    	end
           UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).cancel_email.deliver_now  
   end	

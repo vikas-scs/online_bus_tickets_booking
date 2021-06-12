@@ -2,9 +2,9 @@
     <a class="navbar-brand">Ticket Booking</a>
     <% if user_signed_in? %>
         <form class="form-inline nav-item nav-link mr-sm-2">
-            <%= link_to "Home", root_path %>&nbsp
-            &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
-        	 balance:<%= current_user.wallet.balance.round(2) %> &nbsp
+          <%= link_to "My Reservations", my_reservations_path %>
+        	<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
+        	 balance:<%= current_user.wallet.balance %> &nbsp
         	&nbsp<strong><%= current_user.email %></strong>&nbsp
           &nbsp<%= link_to " Edit profile", edit_user_registration_path %>&nbsp
           &nbsp<%= link_to " logout", destroy_user_session_path, method: :delete %>
@@ -18,36 +18,30 @@
     <% end %>
 </nav>
 <center>
-    <h1>My Reservations</h1>
+    <h1>User :<%= @user.email %> Statements</h1>
     <table class= "myTable" style="width: 50%">
       <tr>
         <th>Reservation Id</th>
+        <th>Statement Id</th>
+        <th>Transaction Type</th>
+        <th>Description</th>
         <th>Bus Id</th>
         <th>no.of seats</th>
         <th>Fare</th>
-        <th>Status</th>
-        <th>Pay</th>
-        <th>cancel</th>
-        <th>Statements</th>
+        <th>amount</th>
+        <th>Refund Amount</th> 
       </tr>
       <tr>
-        <% @reservations.each do |bus| %>
-        <td><%= bus.id %></td>
-       <td><%= bus.bus_id %></td>
-       <td><%= bus.no_seats %></td>
-       <td><%= bus.fare %></td>
-       <td><%= bus.Reserve_status %></td>
-       <% if bus.Reserve_status == "pending" %>
-        <td><%= link_to 'pay', payment_path(id: bus.id) %></td>
-        <td></td>
-       <% elsif bus.Reserve_status == "cancelled" %>
-       <td>refunded</td>
-       <td>cancelled</td>
-       <% else %>
-       <td>paid</td>
-       <td><%= link_to 'cancel', cancel_path(id: bus.payment_id) %></td>
-       <% end %>
-       <td><%= link_to 'Statements', statement_path(id: bus.id) %></td>
+        <% @statements.each do |state| %>
+        <td><%= state.reservation_id %></td>
+        <td><%= state.id %></td>
+       <td><%= state.transaction_type %></td>
+       <td><%= state.description %></td>
+       <td><%= state.bus_id %></td>
+       <td><%= state.no_seats %></td>
+       <td><%= state.seat_fare %></td>
+        <td><%= state.amount %></td>
+       <td><%= state.refund_amount rescue '-' %></td>
       </tr>
       <% end %>
    </table> 
