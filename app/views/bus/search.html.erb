@@ -19,13 +19,14 @@
 </nav>
 <center>
 	<h1>search result</h1>
-    <table class= "myTable" style="width: 50%">
+    <table class= "myTable" style="width: 70%">
       <tr>
         <th>available buses</th>
         <th>date</th>
         <th>Travel hrs</th>
         <th>start from</th>
         <th>destination</th>
+        <th>Available seats</th>
         <th>book</th>
       </tr>
       <tr>
@@ -35,6 +36,17 @@
        <td><%= bus.travel_hrs %></td>
        <td><%= bus.start_point %></td>
       <td><%= bus.end_point %></td>
+      <td><%= bus.available_seats %></td>
+       <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+      </tr>
+      <% end %>
+      <% @rem_buses.each do |bus| %>
+        <td><%= bus.bus_no %></td>
+       <td><%= bus.travel_date %></td>
+       <td><%= bus.travel_hrs %></td>
+       <td><%= bus.start_point %></td>
+      <td><%= bus.end_point %></td>
+      <td><%= bus.available_seats %></td>
        <td><%= link_to 'book', book_path(:id => bus.id) %></td>
       </tr>
       <% end %>
