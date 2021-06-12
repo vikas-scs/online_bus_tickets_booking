@@ -10,21 +10,21 @@ class BusController < ApplicationController
 		else                                                               #checking whether the how many inputs are given
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
 		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ? AND status = ? ', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date], "1")
-		    	@rem_buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ? ', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1")
+		    	
 		    elsif params[:s_point].present? && params[:e_point].present?
-		       @rem_buses = []	
+		       	
 		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1")
 		    elsif params[:s_point].present?
 		       @buses = Bus.where('lower(start_point) = ? AND status = ?', params[:s_point].downcase, "1")
-		       @rem_buses = []	
+		       
 		    elsif params[:e_point].present?	
 			   @buses = Bus.where('lower(end_point) = ? AND status = ?', params[:e_point].downcase, "1")
-			   @rem_buses = []	
+			   
 		    elsif params[:date].present?
                @buses = Bus.where(travel_date: params[:date], status: "1")
-               @rem_buses = []	
+               
             end                                         
-		    if @buses.empty? && @rem_buses.empty?                                    #if searching result is not found then display the error message
+		    if @buses.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no buses are found for ticket booking"
 				redirect_to root_path
 			end

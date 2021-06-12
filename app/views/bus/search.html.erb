@@ -2,6 +2,7 @@
     <a class="navbar-brand">Ticket Booking</a>
     <% if user_signed_in? %>
         <form class="form-inline nav-item nav-link mr-sm-2">
+          &nbsp<%= link_to "Available buses", buses_path %>&nbsp &nbsp &nbsp
           <%= link_to "Home", root_path %>&nbsp
           &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
         	 balance:<%= current_user.wallet.balance %> &nbsp
@@ -44,20 +45,6 @@
         <% end %>
       </tr>
         <% end %>
-      <% @rem_buses.each do |bus| %>
-        <td><%= bus.bus_no %></td>
-        <td><%= bus.travel_date %></td>
-        <td><%= bus.travel_hrs %></td>
-        <td><%= bus.start_point %></td>
-        <td><%= bus.end_point %></td>
-         <td><%= bus.available_seats %></td>
-         <% if bus.available_seats != 0 %>
-           <td><%= link_to 'book', book_path(:id => bus.id) %></td>
-        <% else %>
-           <td>seats full</td>
-        <% end %>
-       </tr>
-      <% end %>
    </table> 
 </center>
 <style>
