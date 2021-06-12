@@ -7,7 +7,8 @@ class WalletController < ApplicationController
       @wallet = @user.wallet
     end
     def create
-    	@statement = Statement.new                              #creating statement when the user adding money to the wallet
+    	@statement = Statement.new  
+      @statement.description = "Adding money to user wallet"                            #creating statement when the user adding money to the wallet
        @statement.transaction_type = "credit"
        @statement.user_id = current_user.id
        @statement.ref_id = "Add#{rand(7 ** 7)}"
@@ -22,8 +23,7 @@ class WalletController < ApplicationController
        total = a + amount
        @user = User.find(current_user.id)
        @wallet = @user.wallet         
-       Wallet.transaction do 
-       @wallet = Wallet.lock("FOR UPDATE NOWAIT").find_by(user_id: @wallet.user_id)                                   #locking the transaction for avoiding deadlocks
+       @wallet.transaction do                                   #locking the transaction for avoiding deadlocks
        @wallet.with_lock do
          @wallet.balance = total
          @wallet.save

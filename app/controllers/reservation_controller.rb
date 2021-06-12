@@ -22,6 +22,7 @@ class ReservationController < ApplicationController
    	@wallet = @user.wallet
     @admin = Admin.find(1)
    	@reservation = Reservation.find(params[:reservation_id])
+    @state = Statement.where(reservation_id: params[:reservation_id]).first
     @payment = Payment.find(params[:payment_id])
     if params[:select_seats].to_i > @reservation.no_seats
       flash[:notice] = "plaese select below or equal #{@reservation.no_seats} count"
@@ -40,9 +41,15 @@ class ReservationController < ApplicationController
     @statement1 = Statement.new
    	@statement.transaction_type = "credit"
     @statement1.transaction_type = "credit"
-    @fare = @bus.fare * params[:select_seats].to_i 
+    @fare = @state.seat_fare * params[:select_seats].to_i 
    	@statement.user_id = @user.id
     @statement.admin_id = @admin.id
+    @statement.description = "Adding refund to user"
+    @statement1.description = "Adding refund fee to admin"
+    @statement.no_seats = params[:select_seats].to_i
+    @statement1.no_seats = params[:select_seats].to_i
+    @statement.seat_fare = @state.seat_fare
+    @statement1.seat_fare = @state.seat_fare
     @statement1.user_id = @user.id
     @statement1.admin_id = @admin.id
     @statement.ref_id = "ref#{rand(7 ** 7)}"
@@ -65,7 +72,6 @@ class ReservationController < ApplicationController
           @admin.wallet = @charge
           if @admin.save!
             @statement1.remaining_balance = @admin.wallet
-            @statement1.save
           end
         end
       end
@@ -76,14 +82,17 @@ class ReservationController < ApplicationController
         @wallet.with_lock do
           @wallet.balance = @total
           if @wallet.save!
-            @statement.remaining_balance = @wallet.balance
-            @statement.save
+            @statement.remaining_balance = @wallet.balance 
           end
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
           @reservation.save
    	      @payment.save
           @reservation.save
+          @statement.reservation_id = @reservation.id
+          @statement1.reservation_id = @reservation.id
+          @statement.save
+           @statement1.save
    	    end
    	  end
    	  elsif @day > 10
@@ -97,13 +106,14 @@ class ReservationController < ApplicationController
           @wallet.save
           @statement.remaining_balance = @wallet.balance
           @reservation.fare = @reservation.fare - @fare
-          @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_is
+          @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
           @reservation.save
           @statement.save
           @statement1.remaining_balance = @admin.wallet
-          @statement1.save
    	      @payment.save
           @reservation.save
+          @statement1.reservation_id = @reservation.id
+          @statement1.save
    	    end
    	  end
    	end

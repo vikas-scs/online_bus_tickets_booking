@@ -5,7 +5,7 @@ class BusController < ApplicationController
 	def search
 		puts params.inspect
 		if !params[:s_point].present? && !params[:e_point].present? && !params[:date].present?
-            	flash[:notice] = "please enter source and destination"
+            	flash[:notice] = "please enter any details"
 				redirect_to root_path
 		else
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
@@ -39,6 +39,11 @@ class BusController < ApplicationController
 			return
 		end
 		@bus = Bus.find(params[:bus_id])
+		if @bus.travel_date < Date.today
+			flash[:notice] = "bus is outdated plaese select another one"
+			redirect_to book_path(id: params[:bus_id])
+		    return
+		end
 		if @bus.total_seats < params[:no_seats].to_i
 			flash[:notice] = "please enter seats count below #{@bus.total_seats}"
 			redirect_to book_path(id: params[:bus_id])
@@ -65,6 +70,9 @@ class BusController < ApplicationController
 			redirect_to new_wallet_path(id: @user.id)
 			return
 	    end
+	    @statement.description = "Booking tickets"
+	    @statement.no_seats = params[:no_seats].to_i
+	    @statement.seat_fare = @bus.fare
 		@payment.user_id = @user.id
 		@cutoff = @wallet.balance - @statement.amount
 		@payment.payment_status = "success"
@@ -80,9 +88,15 @@ class BusController < ApplicationController
                @reservation.Reserve_status = "success"
                @reservation.payment_id = @payment.id
                @reservation.save
+               @statement.reservation_id = @reservation.id
                UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now
                @statement.save
-               @bus.save
+               if @bus.save
+               	  flash[:notice] = "Booking success"
+			      redirect_to my_reservations_path
+			      return
+	         end
+
             end
         end		
 	end
