@@ -37,7 +37,11 @@
           <td><%= bus.start_point %></td>
           <td><%= bus.end_point %></td>
           <td><%= bus.available_seats %></td>
-          <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+         <% if bus.available_seats != 0 %>
+           <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+        <% else %>
+           <td>seats full</td>
+        <% end %>
       </tr>
         <% end %>
       <% @rem_buses.each do |bus| %>
@@ -46,8 +50,12 @@
         <td><%= bus.travel_hrs %></td>
         <td><%= bus.start_point %></td>
         <td><%= bus.end_point %></td>
-        <td><%= bus.available_seats %></td>
-        <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+         <td><%= bus.available_seats %></td>
+         <% if bus.available_seats != 0 %>
+           <td><%= link_to 'book', book_path(:id => bus.id) %></td>
+        <% else %>
+           <td>seats full</td>
+        <% end %>
        </tr>
       <% end %>
    </table> 

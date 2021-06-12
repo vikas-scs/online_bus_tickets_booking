@@ -28,13 +28,15 @@
         <th>End point</th>
         <th>Date</th>
         <th>Total seats</th>
-        <th>Available_seats</th>
+        <th>Available seats</th>
         <th>Fare</th>
         <th>Book Now</th> 
       </tr>
       <tr>
         <% @buses.each do |bus| %>
         <% if bus.travel_date < Date.today %>
+          <% next %>
+        <% elsif bus.status == "0" %>
           <% next %>
         <% else %>
           <td><%= bus.id %></td>

@@ -52,7 +52,7 @@ class ReservationController < ApplicationController
     @statement1 = Statement.new                                #getting the debit info from admin as a statement
     @statement1.bus_id = @bus.id
     @statement1.transaction_type = "debit"
-    @statement1.description = "Giving refund amount to user from Admin "
+    @statement1.description = "Giving refund amount to user"
     @statement1.no_seats = params[:select_seats].to_i
     @statement1.seat_fare = @state.seat_fare
     @statement1.user_id = @user.id

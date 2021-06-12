@@ -9,19 +9,19 @@ class BusController < ApplicationController
 				redirect_to root_path
 		else                                                               #checking whether the how many inputs are given
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
-		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date])
-		    	@rem_buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%")
+		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ? AND status = ? ', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date], "1")
+		    	@rem_buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ? ', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1")
 		    elsif params[:s_point].present? && params[:e_point].present?
 		       @rem_buses = []	
-		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%")
+		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1")
 		    elsif params[:s_point].present?
-		       @buses = Bus.where('lower(start_point) = ?', params[:s_point].downcase)
+		       @buses = Bus.where('lower(start_point) = ? AND status = ?', params[:s_point].downcase, "1")
 		       @rem_buses = []	
 		    elsif params[:e_point].present?	
-			   @buses = Bus.where('lower(end_point) = ?', params[:e_point].downcase)
+			   @buses = Bus.where('lower(end_point) = ? AND status = ?', params[:e_point].downcase, "1")
 			   @rem_buses = []	
 		    elsif params[:date].present?
-               @buses = Bus.where(travel_date: params[:date])
+               @buses = Bus.where(travel_date: params[:date], status: "1")
                @rem_buses = []	
             end                                         
 		    if @buses.empty? && @rem_buses.empty                                    #if searching result is not found then display the error message
@@ -49,8 +49,8 @@ class BusController < ApplicationController
 			redirect_to book_path(id: params[:bus_id])
 		    return
 		end   
-		if @bus.total_seats < params[:no_seats].to_i                #checking whether the required seats are exceeds the bus capacity          
-			flash[:notice] = "please enter seats count below #{@bus.total_seats}"
+		if @bus.available_seats < params[:no_seats].to_i                #checking whether the required seats are exceeds the bus capacity          
+			flash[:notice] = "please enter seats count below #{@bus.available_seats}"
 			redirect_to book_path(id: params[:bus_id])
 			return
         end
@@ -63,10 +63,15 @@ class BusController < ApplicationController
 			redirect_to new_wallet_path(id: @user.id,bus_id: @bus.id,due: @yes)
 			return
 	    end
+	    if @bus.available_seats < 0
+			flash[:notice] = "bus is full plaese select another one"
+			redirect_to book_path(id: params[:bus_id])
+			return
+	    end
         @admin = Admin.find(1)
         @reservation = Reservation.new
         @reservation.bus_id = @bus.id
-		@available = @bus.total_seats - params[:no_seats].to_i
+		@available = @bus.available_seats - params[:no_seats].to_i
 		@bus.available_seats = @available
 		@statement = Statement.new                                   #creating a statement for cutting the money from user to book the tickets
 		@statement.bus_id = @bus.id
@@ -130,7 +135,8 @@ class BusController < ApplicationController
 	end
 	def statement
 		@reservation = Reservation.find(params[:id])
-		@statement =   Statement.where(reservation_id: @reservation.id)     #getting all the statements that are connected with reservation id
+		@statement =   Statement.where(reservation_id: @reservation.id, description: "Adding refund to user")
+		puts @statement     #getting all the statements that are connected with reservation id
 	end
 	def statements
 		@user = current_user
