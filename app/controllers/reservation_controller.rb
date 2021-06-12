@@ -3,7 +3,7 @@ class ReservationController < ApplicationController
 	end
 	def show
 		@reservations = Reservation.where(user_id: current_user.id, Reserve_status: "success") 
-    if @reservation.empty?
+    if @reservations.empty?
         flash[:notice] = "no reservations"
       redirect_to root_path
       return
