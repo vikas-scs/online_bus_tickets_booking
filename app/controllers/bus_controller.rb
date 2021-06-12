@@ -9,7 +9,7 @@ class BusController < ApplicationController
 				redirect_to root_path
 		else
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
-		    	@buses = Bus.where(start_point: params[:s_point], end_point: params[:e_point], travel_date: params[:date])
+		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date])
 		    elsif params[:s_point].present? && params[:e_point].present?	
 		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%")
 		    elsif params[:s_point].present?
@@ -19,7 +19,7 @@ class BusController < ApplicationController
 		    elsif params[:date].present?
                @buses = Bus.where(travel_date: params[:date])
             end
-		    if @buses.empty?
+		    if @buses.empty? 
 			    flash[:notice] = "no buses are found for ticket booking"
 				redirect_to root_path
 			end
@@ -128,6 +128,5 @@ class BusController < ApplicationController
 	def statements
 		@user = current_user
 		@statements = @user.statements
-		
 	end
 end
