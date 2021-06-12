@@ -54,6 +54,8 @@ class BusController < ApplicationController
 			redirect_to book_path(id: params[:bus_id])
 			return
         end
+        @user = current_user
+		@wallet = @user.wallet
         @cost = @bus.fare * params[:no_seats].to_i                  #checking whether the required amount is available in user wallet
         if @cost > @wallet.balance
 			@yes = @cost - @wallet.balance
@@ -72,8 +74,6 @@ class BusController < ApplicationController
 		@statement.admin_id = @admin.id
 		@statement.transaction_type = "debit"
 		@statement.amount = @cost
-		@user = current_user
-		@wallet = @user.wallet
 		@statement.ref_id = "res#{rand(7 ** 7)}"
 		@payment = Payment.new                                #creating a payment note for booking ticket
 		@reservation.user_id = @user.id

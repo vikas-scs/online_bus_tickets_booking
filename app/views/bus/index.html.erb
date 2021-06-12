@@ -2,7 +2,7 @@
     <a class="navbar-brand">Ticket Booking</a>
     <% if user_signed_in? %>
         <form class="form-inline nav-item nav-link mr-sm-2">
-          &nbsp<%= link_to "Future buses", buses_path %>&nbsp &nbsp &nbsp
+          &nbsp<%= link_to "Available buses", buses_path %>&nbsp &nbsp &nbsp
           &nbsp<%= link_to "All Statements", my_statements_path %>&nbsp
            &nbsp &nbsp<%= link_to "My Reservations", my_reservations_path %> &nbsp &nbsp
         	 &nbsp &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
