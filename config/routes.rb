@@ -7,10 +7,11 @@ Rails.application.routes.draw do
   get "bus/book/id", to:"bus#book", as: :book
   get "wallet/index", to:"wallet#index", as: :wallets
   get "bus/seats", to:"bus#seats", as: :seats
+  get "bus/statement/:id", to:"bus#statement", as: :statement
+  get "bus/statements", to:"bus#statements", as: :my_statements
   get "wallet/:id", to:"wallet#new", as: :new_wallet
   post 'wallet/:id', to: 'wallet#create'
   get 'reservation/index', to:'reservation#index', as: :reservation
-  get 'reservation/payment', to:'reservation#payment', as: :payment
   get 'reservation/show', to:'reservation#show', as: :my_reservations
   get 'reservation/cancel', to:'reservation#cancel', as: :cancel
   get 'reservation/cancelled', to:'reservation#cancelled', as: :cancel_ticket
