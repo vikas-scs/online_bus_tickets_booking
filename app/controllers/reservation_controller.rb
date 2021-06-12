@@ -2,7 +2,7 @@ class ReservationController < ApplicationController
 	def index	
 	end
 	def show
-		@reservations = Reservation.where(user_id: current_user.id)          #getting the all reservations that are associated with user
+		@reservations = Reservation.where(user_id: current_user.id, Reserve_status: "success")          #getting the all reservations that are associated with user
 		puts @reservations.ids
 	end
   def cancel

@@ -24,7 +24,7 @@ class BusController < ApplicationController
                @buses = Bus.where(travel_date: params[:date], status: "1")
                @rem_buses = []	
             end                                         
-		    if @buses.empty? && @rem_buses.empty                                    #if searching result is not found then display the error message
+		    if @buses.empty? && @rem_buses.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no buses are found for ticket booking"
 				redirect_to root_path
 			end
