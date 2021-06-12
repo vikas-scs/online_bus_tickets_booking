@@ -5,6 +5,10 @@ class WalletController < ApplicationController
 	def new
       @user = current_user
       @wallet = @user.wallet
+      if params[:bus_id].present?
+        @bus = params[:bus_id]
+        @due = params[:due]
+      end
     end
     def create
     	@statement = Statement.new  
@@ -30,7 +34,11 @@ class WalletController < ApplicationController
             @statement.remaining_balance = @wallet.balance
             @statement.save
           end
-
+        @wallet.save
+        if params[:bus_id].present?
+          redirect_to book_path(:id => params[:bus_id])
+          return
+        end
        end
       end
       puts "helloooo"

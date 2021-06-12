@@ -20,7 +20,12 @@
   <%= form_with(model: @wallets) do |form| %>
   <div>
     <%= form.label :enter_amount %><br>
+    <% if @bus.present? %>
+    <%= form.number_field :balance, value: @due %>
+    <%= form.hidden_field :bus_id, value: @bus %>
+    <% else %>
     <%= form.number_field :balance %>
+    <% end %>
     <%= form.hidden_field :id, autocomplete: current_user.id %>
   </div><br>
 <div class="actions">

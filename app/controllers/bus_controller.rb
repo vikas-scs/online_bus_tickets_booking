@@ -69,8 +69,9 @@ class BusController < ApplicationController
 		@user = current_user
 		@wallet = @user.wallet
 		if @statement.amount > @wallet.balance
+			@yes = @statement.amount - @wallet.balance
 			flash[:notice] = "insufficient balance, please add money"
-			redirect_to new_wallet_path(id: @user.id)
+			redirect_to new_wallet_path(id: @user.id,bus_id: @bus.id,due: @yes)
 			return
 	    end
 		@statement.ref_id = "res#{rand(7 ** 7)}"
