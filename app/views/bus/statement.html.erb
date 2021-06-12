@@ -33,15 +33,15 @@
       <tr>
         <% @statement.each do |state| %>
         <td><%= state.id %></td>
-       <td><%= state.transaction_type %></td>
-       <td><%= state.description %></td>
-       <td><%= state.bus_id %></td>
-       <td><%= state.no_seats %></td>
-       <td><%= state.seat_fare %></td>
+        <td><%= state.transaction_type %></td>
+        <td><%= state.description %></td>
+        <td><%= state.bus_id %></td>
+        <td><%= state.no_seats %></td>
+        <td><%= state.seat_fare %></td>
         <td><%= state.amount %></td>
-       <td><%= state.refund_amount rescue '-' %></td>
+        <td><%= state.refund_amount rescue '-' %></td>
       </tr>
-      <% end %>
+       <% end %>
    </table> 
 </center>
 <style>

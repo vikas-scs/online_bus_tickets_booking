@@ -32,23 +32,23 @@
       </tr>
       <tr>
         <% @reservations.each do |bus| %>
-        <td><%= bus.id %></td>
-       <td><%= bus.bus_id %></td>
-       <td><%= bus.no_seats %></td>
-       <td><%= bus.fare %></td>
-       <td><%= bus.Reserve_status %></td>
-       <% if bus.Reserve_status == "pending" %>
-        <td><%= link_to 'pay', payment_path(id: bus.id) %></td>
-        <td></td>
-       <% elsif bus.Reserve_status == "cancelled" %>
-       <td>refunded</td>
-       <td>cancelled</td>
-       <% else %>
-       <td>paid</td>
-       <td><%= link_to 'cancel', cancel_path(id: bus.payment_id) %></td>
-       <% end %>
-       <td><%= link_to 'Statements', statement_path(id: bus.id) %></td>
-      </tr>
+          <td><%= bus.id %></td>
+          <td><%= bus.bus_id %></td>
+          <td><%= bus.no_seats %></td>
+          <td><%= bus.fare %></td>
+          <td><%= bus.Reserve_status %></td>
+          <% if bus.Reserve_status == "pending" %>
+            <td><%= link_to 'pay', payment_path(id: bus.id) %></td>
+            <td></td>
+          <% elsif bus.Reserve_status == "cancelled" %>
+            <td>refunded</td>
+            <td>cancelled</td>
+          <% else %>
+            <td>paid</td>
+          <td><%= link_to 'cancel', cancel_path(id: bus.payment_id) %></td>
+          <% end %>
+         <td><%= link_to 'Statements', statement_path(id: bus.id) %></td>
+       </tr>
       <% end %>
    </table> 
 </center>

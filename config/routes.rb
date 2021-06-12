@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   get "bus/book/id", to:"bus#book", as: :book
   get "wallet/index", to:"wallet#index", as: :wallets
   get "bus/seats", to:"bus#seats", as: :seats
+  get "bus/buses", to:"bus#buses", as: :buses
   get "bus/statement/:id", to:"bus#statement", as: :statement
   get "bus/statements", to:"bus#statements", as: :my_statements
   get "wallet/:id", to:"wallet#new", as: :new_wallet

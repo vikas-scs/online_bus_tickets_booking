@@ -3,11 +3,11 @@ class BusController < ApplicationController
 		
 	end
 	def search
-		puts params.inspect
+		puts params.inspect                                               #checking whether all field are empty
 		if !params[:s_point].present? && !params[:e_point].present? && !params[:date].present?
             	flash[:notice] = "please enter any details"
 				redirect_to root_path
-		else
+		else                                                               #checking whether the how many inputs are given
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
 		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date])
 		    	@rem_buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?)', "%#{params[:s_point]}%", "%#{params[:e_point]}%")
@@ -23,74 +23,65 @@ class BusController < ApplicationController
 		    elsif params[:date].present?
                @buses = Bus.where(travel_date: params[:date])
                @rem_buses = []	
-            end
-		    if @buses.empty? && @rem_buses.empty
+            end                                         
+		    if @buses.empty? && @rem_buses.empty                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no buses are found for ticket booking"
 				redirect_to root_path
 			end
 		end
 	end
 	def book
-		if !user_signed_in?
+		if !user_signed_in?                                      #checking whether user is logged in or not before booking tickets
 			flash[:notice] = "please login to continue"
 			redirect_to new_user_session_path(id: params[:id])
 		end
-		@seats = Bus.find(params[:id])		
+		@seats = Bus.find(params[:id])	                          #getting the details the booking bus	
 	end
 	def seats
-		if params[:no_seats] == "" 
+		if params[:no_seats] == ""                                 #checking whether the no.of tickets are entered or empty
 			flash[:notice] = "please enter no.of seats"
 			redirect_to book_path(id: params[:bus_id])
 			return
 		end
-		@bus = Bus.find(params[:bus_id])
+		@bus = Bus.find(params[:bus_id])                            #checking bus date that if already travelling completed
 		if @bus.travel_date < Date.today
 			flash[:notice] = "bus is outdated plaese select another one"
 			redirect_to book_path(id: params[:bus_id])
 		    return
-		end
-		if @bus.total_seats < params[:no_seats].to_i
+		end   
+		if @bus.total_seats < params[:no_seats].to_i                #checking whether the required seats are exceeds the bus capacity          
 			flash[:notice] = "please enter seats count below #{@bus.total_seats}"
 			redirect_to book_path(id: params[:bus_id])
 			return
         end
+        @cost = @bus.fare * params[:no_seats].to_i                  #checking whether the required amount is available in user wallet
+        if @cost > @wallet.balance
+			@yes = @cost - @wallet.balance
+			flash[:notice] = "insufficient balance, please add money"
+			redirect_to new_wallet_path(id: @user.id,bus_id: @bus.id,due: @yes)
+			return
+	    end
         @admin = Admin.find(1)
         @reservation = Reservation.new
         @reservation.bus_id = @bus.id
 		@available = @bus.total_seats - params[:no_seats].to_i
 		@bus.available_seats = @available
-		@statement = Statement.new
-		@statement1 = Statement.new
+		@statement = Statement.new                                   #creating a statement for cutting the money from user to book the tickets
 		@statement.bus_id = @bus.id
-		@statement1.bus_id = @bus.id
 		@statement.user_id = current_user.id
-		@statement1.user_id = current_user.id
 		@statement.admin_id = @admin.id
-		@statement1.admin_id = @admin.id
 		@statement.transaction_type = "debit"
-		@statement1.transaction_type = "credit"
-		@statement.amount = @bus.fare * params[:no_seats].to_i
-		@statement1.amount = @bus.fare * params[:no_seats].to_i
+		@statement.amount = @cost
 		@user = current_user
 		@wallet = @user.wallet
-		if @statement.amount > @wallet.balance
-			@yes = @statement.amount - @wallet.balance
-			flash[:notice] = "insufficient balance, please add money"
-			redirect_to new_wallet_path(id: @user.id,bus_id: @bus.id,due: @yes)
-			return
-	    end
 		@statement.ref_id = "res#{rand(7 ** 7)}"
-		@statement1.ref_id = "res#{rand(7 ** 7)}"
-		@payment = Payment.new
+		@payment = Payment.new                                #creating a payment note for booking ticket
 		@reservation.user_id = @user.id
 		@reservation.no_seats = params[:no_seats].to_i
 		@reservation.fare = @statement.amount
 	    @statement.description = "Booking tickets"
-	    @statement1.description = "getting money for Booking tickets"
 	    @statement.no_seats = params[:no_seats].to_i
-	    @statement1.no_seats = params[:no_seats].to_i
 	    @statement.seat_fare = @bus.fare
-	    @statement1.seat_fare = @bus.fare
 		@payment.user_id = @user.id
 		@cutoff = @wallet.balance - @statement.amount
 		@payment.payment_status = "success"
@@ -107,32 +98,46 @@ class BusController < ApplicationController
                @reservation.payment_id = @payment.id
                @reservation.save
                @statement.reservation_id = @reservation.id
-               UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now
+               UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now     #sending the confirmation email to user for ticket booking details
                @statement.save
                @bus.save
             end
         end
+        @statement1 = Statement.new                            #creating a statement for adding the cutting amount to admin wallet
+        @statement1.bus_id = @bus.id
+        @statement1.user_id = current_user.id
+        @statement1.admin_id = @admin.id
+        @statement1.transaction_type = "credit"
+        @statement1.amount = @bus.fare * params[:no_seats].to_i
+        @statement1.ref_id = "res#{rand(7 ** 7)}"
+        @statement1.description = "getting money for Booking tickets"
+        @statement1.no_seats = params[:no_seats].to_i
+        @statement1.seat_fare = @bus.fare
         @admin.transaction do 
            @admin.with_lock do 
-              @add = @admin.wallet + @statement.amount
-              @admin.wallet = @add
-              @admin.save
-                 @statement1.remaining_balance = @admin.wallet
-                 @statement1.reservation_id = @reservation.id
-                 if @statement1.save
-                   flash[:notice] = "booking successful"
-			       redirect_to my_reservations_path
-			     return
-			  end
+                @add = @admin.wallet + @statement.amount
+                @admin.wallet = @add
+                @admin.save
+                @statement1.remaining_balance = @admin.wallet
+                @statement1.reservation_id = @reservation.id
+                if @statement1.save                                        #displaying success message if the booking id succesful
+                    flash[:notice] = "booking successful"
+			        redirect_to my_reservations_path
+			        return
+			    end
 			end
 	    end	
 	end
 	def statement
 		@reservation = Reservation.find(params[:id])
-		@statement = @reservation.statements
+		@statement =   Statement.where(reservation_id: @reservation.id)     #getting all the statements that are connected with reservation id
 	end
 	def statements
 		@user = current_user
-		@statements = @user.statements
+		@statements = @user.statements                           #getting all the statements that are associated with the user_id
+	end
+	def buses
+		@buses = Bus.all                                         #displaying the all available buses
+		puts @buses
 	end
 end

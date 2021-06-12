@@ -18,6 +18,6 @@
 <center>
   <h1>Available Balance:</h1>
   <%= @user.wallet.balance rescue 0 %><br>
-    <%= link_to "Add money", new_wallet_path(id: current_user.id) %><br>
+  <%= link_to "Add money", new_wallet_path(id: current_user.id) %><br>
   <%= link_to "Back" , root_path %>
 </center>
