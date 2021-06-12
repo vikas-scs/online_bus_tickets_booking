@@ -136,14 +136,26 @@ class BusController < ApplicationController
 	def statement
 		@reservation = Reservation.find(params[:id])
 		@statement =   Statement.where(reservation_id: @reservation.id, description: "Adding refund to user")
+		 if @statement.empty?                                    #if searching result is not found then display the error message
+			    flash[:notice] = "no statements found"
+				redirect_to root_path
+			end
 		puts @statement     #getting all the statements that are connected with reservation id
 	end
 	def statements
 		@user = current_user
-		@statements = @user.statements                           #getting all the statements that are associated with the user_id
+		@statements = @user.statements
+		if @statements.empty?                                    #if searching result is not found then display the error message
+			    flash[:notice] = "no statements found"
+				redirect_to root_path
+		end                           #getting all the statements that are associated with the user_id
 	end
 	def buses
-		@buses = Bus.all                                         #displaying the all available buses
+		@buses = Bus.where(status: "1")
+		if @buses.empty?                                    #if searching result is not found then display the error message
+			    flash[:notice] = "no statements found"
+				redirect_to root_path
+			end                                        #displaying the all available buses
 		puts @buses
 	end
 end
