@@ -151,7 +151,7 @@ class BusController < ApplicationController
 	end
 	def statement
 		@reservation = Reservation.find(params[:id])
-		@statement =   Statement.where( user_id: present? ,reservation_id: @reservation.id)
+		@statement =   Statement.where( user_id: current_user.id,reservation_id: @reservation.id)
 		 if @statement.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no statements found"
 				redirect_to root_path
