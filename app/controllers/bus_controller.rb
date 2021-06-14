@@ -89,28 +89,28 @@ class BusController < ApplicationController
         @reservation.bus_id = @bus.id
 		@available = @bus.available_seats - params[:no_seats].to_i
 		@bus.available_seats = @available
-		@statement = Statement.new                                   #creating a statement for cutting the money from user to book the tickets
-		@statement.bus_id = @bus.id
-		@statement.user_id = current_user.id
-		@statement.transaction_type = "debit"
-		@statement.amount = @cost
-		@statement.ref_id = "res#{rand(7 ** 7)}"
 		@payment = Payment.new                                #creating a payment note for booking ticket
 		@reservation.user_id = @user.id
 		@reservation.no_seats = params[:no_seats].to_i
-		@reservation.fare = @statement.amount
-	    @statement.description = "Booking tickets"
-	    @statement.no_seats = params[:no_seats].to_i
-	    @statement.seat_fare = @bus.fare
 		@payment.user_id = @user.id
-		@cutoff = @wallet.balance - @statement.amount
+		@cutoff = @wallet.balance - @cost
 		@payment.payment_status = "success"
 		@wallet.transaction do                                    #locking the transaction for avoiding deadlocks
            @wallet.with_lock do
                @wallet.balance = @cutoff
                if @wallet.save!
+               	@statement = Statement.new
+               	@statement.bus_id = @bus.id
+		         @statement.user_id = current_user.id
+		         @statement.transaction_type = "debit"
+		         @statement.amount = @cost
+		         @statement.ref_id = "res#{rand(7 ** 7)}"                                   #creating a statement for cutting the money from user to book the tickets
                   @statement.remaining_balance = @wallet.balance
+                  @statement.description = "Booking tickets"
+	             @statement.no_seats = params[:no_seats].to_i
+	             @statement.seat_fare = @bus.fare
                   @payment.amount = @statement.amount
+                  @reservation.fare = @statement.amount
                   @payment.ref_id = "res#{rand(7 ** 7)}"
                   @payment.bus_id = @bus.id
                   @payment.save
@@ -124,20 +124,20 @@ class BusController < ApplicationController
               end
             end
         end
-        @statement1 = Statement.new                            #creating a statement for adding the cutting amount to admin wallet
-        @statement1.bus_id = @bus.id
-        @statement1.admin_id = @admin.id
-        @statement1.transaction_type = "credit"
-        @statement1.amount = @bus.fare * params[:no_seats].to_i
-        @statement1.ref_id = "res#{rand(7 ** 7)}"
-        @statement1.description = "getting money for Booking tickets"
-        @statement1.no_seats = params[:no_seats].to_i
-        @statement1.seat_fare = @bus.fare
         @admin.transaction do 
            @admin.with_lock do 
                 @add = @admin.wallet + @statement.amount
                 @admin.wallet = @add
                 if @admin.save!
+                	 @statement1 = Statement.new                            #creating a statement for adding the cutting amount to admin wallet
+                     @statement1.bus_id = @bus.id
+                     @statement1.admin_id = @admin.id
+                     @statement1.transaction_type = "credit"
+                     @statement1.amount = @bus.fare * params[:no_seats].to_i
+                     @statement1.ref_id = "res#{rand(7 ** 7)}"
+                     @statement1.description = "getting money for Booking tickets"
+                     @statement1.no_seats = params[:no_seats].to_i
+                     @statement1.seat_fare = @bus.fare
                    @statement1.remaining_balance = @admin.wallet
                    @statement1.reservation_id = @reservation.id
                    if @statement1.save                                        #displaying success message if the booking id succesful
