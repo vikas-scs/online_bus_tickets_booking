@@ -22,7 +22,7 @@ class WalletController < ApplicationController
       @statement.transaction_type = "credit"
       @statement.user_id = current_user.id
       @statement.ref_id = "Add#{rand(7 ** 7)}"
-      @statement.amount = amount
+      @statement.refund_amount = amount
   	  a = current_user.wallet.balance
       total = a + amount
       @user = current_user

@@ -8,6 +8,5 @@ class User < ApplicationRecord
    validates :mobile, format: { with: /\A[6-9]{1}\d{9}\z/ }, allow_blank: true
   has_one :wallet
   has_many :reservations
-  has_many :statements
   has_many :payments
 end

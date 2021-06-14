@@ -35,7 +35,7 @@
       <tr>
         <% @reservations.each do |bus| %>
           <td><%= bus.id %></td>
-          <td><%= bus.bus_id %></td>
+          <td><%= link_to "#{bus.bus_id}" , book_path(id: bus.bus_id) %></td>
           <td><%= bus.no_seats %></td>
           <td><%= bus.fare %></td>
           <td><%= bus.Reserve_status %></td>

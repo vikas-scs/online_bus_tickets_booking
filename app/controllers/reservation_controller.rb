@@ -35,7 +35,18 @@ class ReservationController < ApplicationController
       return
     end
    	@bus = Bus.find(@reservation.bus_id)
-    @admin = Admin.find(1)           
+    @admin = Admin.find(1)
+    if params[:select_seats].to_i <= 0
+      puts "cominggg"                                 #checking whether the no.of tickets are entered or empty
+      flash[:notice] = "please enter no.of seats"
+       redirect_to cancel_path(id: @payment.id)
+      return
+    end
+    if params[:select_seats] == ""                               #checking whether the no.of tickets are entered or empty
+      flash[:notice] = "please enter no.of seats"
+       redirect_to cancel_path(id: @payment.id)
+      return
+    end               
     if params[:select_seats].to_i == @reservation.no_seats          #checking the whether all tickets are cancelled 
    	  @reservation.Reserve_status = "cancelled"
     else
@@ -47,7 +58,6 @@ class ReservationController < ApplicationController
    	@statement.transaction_type = "credit"
     @fare = @state.seat_fare * params[:select_seats].to_i 
    	@statement.user_id = @user.id
-    @statement.admin_id = @admin.id
     @statement.description = "Adding refund to user"
     @statement.no_seats = params[:select_seats].to_i
     @statement.seat_fare = @state.seat_fare
@@ -60,7 +70,6 @@ class ReservationController < ApplicationController
     @statement1.description = "Giving refund amount to user"
     @statement1.no_seats = params[:select_seats].to_i
     @statement1.seat_fare = @state.seat_fare
-    @statement1.user_id = @user.id
     @statement1.admin_id = @admin.id
     @statement1.ref_id = "ref#{rand(7 ** 7)}"
     if @day <= 10                                            #conditions for cutting refund money based on days gap
@@ -70,7 +79,7 @@ class ReservationController < ApplicationController
         @amount = (@fare * @cancel_fee.days_5) / 100
    	  elsif @day > 5 && @day <= 7
         @amount = (@fare * @cancel_fee.days_7) / 100
-   	  elsif @day > 7 && @dat <= 10
+   	  elsif @day > 7 && @day <= 10
    	    @amount = (@fare * @cancel_fee.days_10) / 100
       end
       @refunds = @fare - @amount
