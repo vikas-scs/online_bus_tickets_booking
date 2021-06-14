@@ -34,7 +34,7 @@
         <th>Refund Amount</th> 
       </tr>
       <tr>
-        <% @statement.each do |state| %>
+        <% @statement.reverse.each do |state| %>
         <td><%= state.ref_id %></td>
         <td><%= state.transaction_type %></td>
         <td><%= state.description %></td>
