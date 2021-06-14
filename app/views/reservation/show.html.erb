@@ -5,7 +5,6 @@
           <%= link_to "Home", root_path %>&nbsp
           &nbsp<%= link_to "Available buses", buses_path %>&nbsp &nbsp &nbsp
           &nbsp<%= link_to "All Statements", my_statements_path %>&nbsp
-           &nbsp &nbsp<%= link_to "My Reservations", my_reservations_path %> &nbsp &nbsp
            &nbsp &nbsp<%= link_to "Add money", wallets_path(id: current_user.id) %> &nbsp
            balance:<%= current_user.wallet.balance %> &nbsp
           &nbsp<strong><%= current_user.email %></strong>&nbsp
