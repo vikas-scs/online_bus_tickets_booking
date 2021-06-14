@@ -52,26 +52,9 @@ class ReservationController < ApplicationController
     else
       @reservation.Reserve_status = "success"
     end
-   	@day = @bus.travel_date - Date.today                            #getting day to travelling day gap
-   	@statement = Statement.new                                       #creating a statement for adding refund amount to user
-    @statement.bus_id = @bus.id
-   	@statement.transaction_type = "credit"
-    @fare = @state.seat_fare * params[:select_seats].to_i 
-   	@statement.user_id = @user.id
-    @statement.description = "Adding refund to user"
-    @statement.no_seats = params[:select_seats].to_i
-    @statement.seat_fare = @state.seat_fare
-    @statement.user_id = @user.id
-    @statement.ref_id = "ref#{rand(7 ** 7)}"
+   	@day = @bus.travel_date - Date.today 
+    @fare = @state.seat_fare * params[:select_seats].to_i                #getting day to travelling day gap
     @cancel_fee = CancelFee.find(1)                            #getting the cancellation percentage for refund money
-    @statement1 = Statement.new                                #getting the debit info from admin as a statement
-    @statement1.bus_id = @bus.id
-    @statement1.transaction_type = "debit"
-    @statement1.description = "Giving refund amount to user"
-    @statement1.no_seats = params[:select_seats].to_i
-    @statement1.seat_fare = @state.seat_fare
-    @statement1.admin_id = @admin.id
-    @statement1.ref_id = "ref#{rand(7 ** 7)}"
     if @day <= 10                                            #conditions for cutting refund money based on days gap
       if @day == 3
    	    @amount = (@fare * @cancel_fee.hrs_72) / 100 
@@ -83,32 +66,49 @@ class ReservationController < ApplicationController
    	    @amount = (@fare * @cancel_fee.days_10) / 100
       end
       @refunds = @fare - @amount
-      @statement.refund_amount = @refunds
-   	  @statement1.refund_amount = @refunds
    	  @user_get = @wallet.balance + @refunds
    	  @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
           @wallet.balance = @user_get
           if @wallet.save!
-            @statement.remaining_balance = @wallet.balance 
-          end
+            @statement = Statement.new  
+            @statement.remaining_balance = @wallet.balance                                     #creating a statement for adding refund amount to user
+            @statement.bus_id = @bus.id
+            @statement.transaction_type = "credit"
+            @statement.user_id = @user.id
+            @statement.description = "Adding refund to user"
+            @statement.no_seats = params[:select_seats].to_i
+            @statement.seat_fare = @state.seat_fare
+            @statement.refund_amount = @refunds
+            @statement.user_id = @user.id
+            @statement.ref_id = "ref#{rand(7 ** 7)}" 
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
           @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
           @reservation.save
    	      @payment.save
           @statement.reservation_id = @reservation.id
-          @statement1.reservation_id = @reservation.id
           @statement.save
           @bus.save
    	    end
+       end
    	  end
       @admin.transaction do                                    #locking the transaction for avoiding deadlocks
         @admin.with_lock do
           @charge =  @admin.wallet  - @amount 
           @admin.wallet = @charge
           if @admin.save!
+            @statement1 = Statement.new                                #getting the debit info from admin as a statement
+            @statement1.bus_id = @bus.id
+            @statement1.transaction_type = "debit"
+            @statement1.description = "Giving refund amount to user"
+            @statement1.no_seats = params[:select_seats].to_i
+            @statement1.seat_fare = @state.seat_fare
+            @statement1.admin_id = @admin.id
             @statement1.remaining_balance = @admin.wallet
+            @statement1.refund_amount = @refunds
+            @statement1.ref_id = "ref#{rand(7 ** 7)}"
+            @statement1.reservation_id = @reservation.id
             @statement1.save
             flash[:notice] = "successfully cancelled ticket!!!"
             redirect_to my_reservations_path
@@ -126,7 +126,17 @@ class ReservationController < ApplicationController
           @wallet.balance = @get
           if @wallet.save!
             @statement.remaining_balance = @wallet.balance
-          end
+            @statement = Statement.new                                       #creating a statement for adding refund amount to user
+            @statement.bus_id = @bus.id
+            @statement.transaction_type = "credit"
+            @statement.user_id = @user.id
+            @statement.description = "Adding refund to user"
+            @statement.no_seats = params[:select_seats].to_i
+            @statement.seat_fare = @state.seat_fare
+            @statement.refund_amount = @refunds
+            @statement.user_id = @user.id
+            @statement.ref_id = "ref#{rand(7 ** 7)}" 
+            @statement.remaining_balance = @wallet.balance
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
           @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
@@ -134,16 +144,27 @@ class ReservationController < ApplicationController
           @statement.save
    	      @payment.save
           @statement.reservation_id = @reservation.id
-          @statement1.reservation_id = @reservation.id
           @statement.save
           @bus.save
+        end
    	    end
    	  end
       @admin.transaction do                                    #locking the transaction for avoiding deadlocks
         @admin.with_lock do
           @admin.wallet = @admin_get
           if @admin.save!
+            @statement1 = Statement.new                                #getting the debit info from admin as a statement
+            @statement1.bus_id = @bus.id
+            @statement1.transaction_type = "debit"
+            @statement1.description = "Giving refund amount to user"
+            @statement1.no_seats = params[:select_seats].to_i
+            @statement1.seat_fare = @state.seat_fare
+            @statement1.admin_id = @admin.id
             @statement1.remaining_balance = @admin.wallet
+            @statement1.refund_amount = @refunds
+            @statement1.ref_id = "ref#{rand(7 ** 7)}"
+            @statement1.remaining_balance = @admin.wallet
+            @statement1.reservation_id = @reservation.id
             @statement1.save
             flash[:notice] = "successfully cancelled ticket!!!"
             redirect_to my_reservations_path

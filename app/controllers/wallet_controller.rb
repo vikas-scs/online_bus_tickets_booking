@@ -17,12 +17,6 @@ class WalletController < ApplicationController
           redirect_to wallets_path
           return
       end
-    	@statement = Statement.new  
-      @statement.description = "Adding money to user wallet"                            #creating statement when the user adding money to the wallet
-      @statement.transaction_type = "credit"
-      @statement.user_id = current_user.id
-      @statement.ref_id = "Add#{rand(7 ** 7)}"
-      @statement.refund_amount = amount
   	  a = current_user.wallet.balance
       total = a + amount
       @user = current_user
@@ -31,6 +25,12 @@ class WalletController < ApplicationController
         @wallet.with_lock do
           @wallet.balance = total
           if @wallet.save!
+            @statement = Statement.new  
+            @statement.description = "Adding money to user wallet"                            #creating statement when the user adding money to the wallet
+            @statement.transaction_type = "credit"
+            @statement.user_id = current_user.id
+            @statement.ref_id = "Add#{rand(7 ** 7)}"
+            @statement.refund_amount = amount
             @statement.remaining_balance = @wallet.balance
             @statement.save
           end
