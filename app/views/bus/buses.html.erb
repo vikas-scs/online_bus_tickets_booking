@@ -39,6 +39,8 @@
           <% next %>
         <% elsif bus.status == "0" %>
           <% next %>
+          <%elsif bus.available_seats == 0 %>
+          <% next %>     
         <% else %>
           <td><%= bus.id %></td>
           <td><%= bus.bus_no %></td>
