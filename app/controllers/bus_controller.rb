@@ -159,12 +159,8 @@ class BusController < ApplicationController
 		puts @statement     #getting all the statements that are connected with reservation id
 	end
 	def statements
-		@user = current_user
-		@statement =   Statement.where(user_id: present?)
-		if !@statement.empty?
-			@statement1 = @statement.sort_by(&:created_at)
-		end
-		if @statement.empty?                                  #if searching result is not found then display the error message
+		@statement1 =   Statement.where(user_id: current_user.id)
+		if @statement1.empty?                                  #if searching result is not found then display the error message
 			    flash[:notice] = "no statements found"
 				redirect_to root_path
 		end                           #getting all the statements that are associated with the user_id
