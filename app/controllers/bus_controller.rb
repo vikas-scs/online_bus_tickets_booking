@@ -22,7 +22,7 @@ class BusController < ApplicationController
 			elsif params[:s_point].present?	
 			   @buses = Bus.where('lower(start_point) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:s_point].downcase, "1",0,Date.today)
 			   elsif params[:e_point].present?	
-			   @buses = Bus.where('lower(end_point) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:e_point].downcase, "1", 0,Data.today)
+			   @buses = Bus.where('lower(end_point) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:e_point].downcase, "1", 0,Date.today)
 			   
 		    elsif params[:date].present?
                @buses = Bus.where('Date(travel_date) = ? AND status = ? AND available_seats != ? AND travel_date > ?',params[:date],"1",0,Date.today)
@@ -97,32 +97,44 @@ class BusController < ApplicationController
 		@payment.payment_status = "success"
 		@wallet.transaction do                                    #locking the transaction for avoiding deadlocks
            @wallet.with_lock do
-               @wallet.balance = @cutoff
-               if @wallet.save!
-               	@statement = Statement.new
-               	@statement.bus_id = @bus.id
-		         @statement.user_id = current_user.id
-		         @statement.transaction_type = "debit"
-		         @statement.amount = @cost
-		         @statement.ref_id = "res#{rand(7 ** 7)}"  
-		         @reservation.bus_no = "AP #{rand(7*3)} #{rand(7*8*7*8)}"                                 #creating a statement for cutting the money from user to book the tickets
-                  @statement.remaining_balance = @wallet.balance
-                  @statement.description = "Booking tickets"
-	             @statement.no_seats = params[:no_seats].to_i
-	             @statement.seat_fare = @bus.fare
-                  @payment.amount = @statement.amount
-                  @reservation.fare = @statement.amount
-                  @payment.ref_id = "res#{rand(7 ** 7)}"
-                  @payment.bus_id = @bus.id
-                  @payment.save
-                  @reservation.Reserve_status = "success"
-                  @reservation.payment_id = @payment.id
-                  @reservation.save
-                  @statement.reservation_id = @reservation.id
-                  UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now     #sending the confirmation email to user for ticket booking details
-                  @statement.save
-                  @bus.save
-              end
+                @wallet.balance = @cutoff
+                if @wallet.save!
+               	    @statement = Statement.new
+               	    @statement.bus_id = @bus.id
+		            @statement.user_id = current_user.id
+		            @statement.transaction_type = "debit"
+		            @statement.amount = @cost
+		            @statement.ref_id = "res#{rand(7 ** 7)}" 
+		            bus_no = nil
+		            loop do
+		                bus_no = "#{rand(7 ** 7)}"
+		                @number = Reservation.find_by(bus_no: bus_no)
+		                if @number.nil?
+		                    @reservation.bus_no = bus_no
+		                    break
+		                else
+		                     next
+		                end	
+		            end 
+		            puts "hello #{bus_no}"
+		                                           #creating a statement for cutting the money from user to book the tickets
+                    @statement.remaining_balance = @wallet.balance
+                    @statement.description = "Booking tickets"
+	                @statement.no_seats = params[:no_seats].to_i
+	                @statement.seat_fare = @bus.fare
+                    @payment.amount = @statement.amount
+                    @reservation.fare = @statement.amount
+                    @payment.ref_id = "res#{rand(7 ** 7)}"
+                    @payment.bus_id = @bus.id
+                    @payment.save
+                    @reservation.Reserve_status = "success"
+                    @reservation.payment_id = @payment.id
+                    @reservation.save
+                    UserMailer.with(user_id: @user.id, reservation_id: @reservation.id).confimation_email.deliver_now     #sending the confirmation email to user for ticket booking details  	
+                    @statement.reservation_id = @reservation.id
+                    @statement.save
+                    @bus.save
+                end
             end
         end
         @admin.transaction do 
@@ -139,16 +151,16 @@ class BusController < ApplicationController
                      @statement1.description = "getting money for Booking tickets"
                      @statement1.no_seats = params[:no_seats].to_i
                      @statement1.seat_fare = @bus.fare
-                   @statement1.remaining_balance = @admin.wallet
-                   @statement1.reservation_id = @reservation.id
-                   if @statement1.save                                        #displaying success message if the booking id succesful
+                     @statement1.remaining_balance = @admin.wallet
+                     @statement1.reservation_id = @reservation.id
+                     if @statement1.save                                        #displaying success message if the booking id succesful
                        flash[:notice] = "booking successful"
 			           redirect_to my_reservations_path
 			           return
-			        end
+			         end
 			    end
 			end
-	    end	
+	    end
 	end
 	def statement
 		@reservation = Reservation.find(params[:id])
@@ -158,7 +170,7 @@ class BusController < ApplicationController
 		 if @statement.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no statements found"
 				redirect_to root_path
-			end
+		end
 		puts @statement     #getting all the statements that are connected with reservation id
 	end
 	def statements
