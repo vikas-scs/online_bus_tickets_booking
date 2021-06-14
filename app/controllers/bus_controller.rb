@@ -9,25 +9,25 @@ class BusController < ApplicationController
 				redirect_to root_path
 		else                                                               #checking whether the how many inputs are given
 		    if params[:s_point].present? && params[:e_point].present? && params[:date].present?
-		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ? AND status = ? ', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date], "1")
+		    	@buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND Date(travel_date) = ? AND status = ? AND available_seats != ? AND travel_date > ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%",params[:date], "1", 0, Date.today)
 		    	
 		    elsif params[:s_point].present? && params[:e_point].present?
 		       	
-		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1")
+		       @buses = Bus.where('lower(start_point) LIKE lower(?) AND lower(end_point) LIKE lower(?) AND status = ? AND available_seats != ? AND travel_date > ?', "%#{params[:s_point]}%", "%#{params[:e_point]}%", "1", 0,Date.today)
 		    elsif params[:s_point].present? && params[:date].present?
-		       @buses = Bus.where('lower(start_point) = ? AND Date(travel_date) = ? AND status = ?', params[:s_point].downcase,params[:date], "1")
+		       @buses = Bus.where('lower(start_point) = ? AND Date(travel_date) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:s_point].downcase,params[:date], "1",0,Date.today)
 		       
 		    elsif params[:e_point].present?	&& params[:date].present?
-			   @buses = Bus.where('lower(end_point) = ? AND Date(travel_date) = ? AND status = ?', params[:e_point].downcase,params[:date], "1")
+			   @buses = Bus.where('lower(end_point) = ? AND Date(travel_date) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:e_point].downcase,params[:date], "1",0,Date.today)
 			elsif params[:s_point].present?	
-			   @buses = Bus.where('lower(start_point) = ? AND status = ?', params[:s_point].downcase, "1")
+			   @buses = Bus.where('lower(start_point) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:s_point].downcase, "1",0,Date.today)
 			   elsif params[:e_point].present?	
-			   @buses = Bus.where('lower(end_point) = ? AND status = ?', params[:e_point].downcase, "1")
+			   @buses = Bus.where('lower(end_point) = ? AND status = ? AND available_seats != ? AND travel_date > ?', params[:e_point].downcase, "1", 0,Data.today)
 			   
 		    elsif params[:date].present?
-               @buses = Bus.where(travel_date: params[:date], status: "1")
-               
-            end                                         
+               @buses = Bus.where('Date(travel_date) = ? AND status = ? AND available_seats != ? AND travel_date > ?',params[:date],"1",0,Date.today)
+            end 
+            puts @buses.ids                                       
 		    if @buses.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no buses are found for ticket booking"
 				redirect_to root_path
