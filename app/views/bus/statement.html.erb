@@ -24,27 +24,23 @@
     <h1>Reservation :<%= @reservation.id %> Statements</h1>
     <table class= "myTable" style="width: 50%">
       <tr>
-        <th>Statement Id</th>
-        <th>Transaction Type</th>
+        <th>date</th>
         <th>Description</th>
-        <th>Bus Id</th>
-        <th>no.of seats</th>
-        <th>Fare</th>
-        <th>amount</th>
-        <th>Refund Amount</th> 
+        <th>Transaction Id</th>
+        <th>Credit</th>
+        <th>Debit</th>
+        <th>Available Balance</th> 
       </tr>
       <tr>
         <% @statement.reverse.each do |state| %>
-        <td><%= state.ref_id %></td>
-        <td><%= state.transaction_type %></td>
+        <td><%= state.created_at.strftime("%m/%d/%Y") %></td>
         <td><%= state.description %></td>
-        <td><%= state.bus_id %></td>
-        <td><%= state.no_seats %></td>
-        <td><%= state.seat_fare %></td>
+        <td><%= state.ref_id %></td>
+        <td><%= state.refund_amount %></td>
         <td><%= state.amount %></td>
-        <td><%= state.refund_amount rescue '-' %></td>
+        <td><%= state.remaining_balance %></td>
       </tr>
-       <% end %>
+      <% end %>
    </table> 
 </center>
 <style>
