@@ -23,7 +23,6 @@
     <h1>Buses Available</h1>
     <table class= "myTable" style="width: 80%">
       <tr>
-        <th>Bus id</th>
         <th>Bus no</th>
         <th>Start point</th>
         <th>End point</th>
@@ -42,7 +41,6 @@
           <%elsif bus.available_seats == 0 %>
           <% next %>     
         <% else %>
-          <td><%= bus.id %></td>
           <td><%= bus.bus_no %></td>
           <td><%= bus.start_point %></td>
           <td><%= bus.end_point %></td>
