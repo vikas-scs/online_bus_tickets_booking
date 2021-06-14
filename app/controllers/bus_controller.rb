@@ -104,7 +104,8 @@ class BusController < ApplicationController
 		         @statement.user_id = current_user.id
 		         @statement.transaction_type = "debit"
 		         @statement.amount = @cost
-		         @statement.ref_id = "res#{rand(7 ** 7)}"                                   #creating a statement for cutting the money from user to book the tickets
+		         @statement.ref_id = "res#{rand(7 ** 7)}"  
+		         @reservation.bus_no = "AP #{rand(7*3)} #{rand(7*8*7*8)}"                                 #creating a statement for cutting the money from user to book the tickets
                   @statement.remaining_balance = @wallet.balance
                   @statement.description = "Booking tickets"
 	             @statement.no_seats = params[:no_seats].to_i
@@ -151,7 +152,9 @@ class BusController < ApplicationController
 	end
 	def statement
 		@reservation = Reservation.find(params[:id])
-		@statement =   Statement.where( user_id: current_user.id,reservation_id: @reservation.id)
+		@statement1 =   Statement.where( user_id: current_user.id,reservation_id: @reservation.id)
+		@statement = @statement1.order("created_at DESC")
+		puts @statement.ids
 		 if @statement.empty?                                    #if searching result is not found then display the error message
 			    flash[:notice] = "no statements found"
 				redirect_to root_path
@@ -160,7 +163,8 @@ class BusController < ApplicationController
 	end
 	def statements
 		@statement1 =   Statement.where(user_id: current_user.id)
-		if @statement1.empty?                                  #if searching result is not found then display the error message
+		@statement = @statement1.order("created_at DESC")
+		if @statement.empty?                                  #if searching result is not found then display the error message
 			    flash[:notice] = "no statements found"
 				redirect_to root_path
 		end                           #getting all the statements that are associated with the user_id

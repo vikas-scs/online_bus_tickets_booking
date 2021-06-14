@@ -32,7 +32,7 @@
         <th>Available Balance</th> 
       </tr>
       <tr>
-        <% @statement.reverse.each do |state| %>
+        <% @statement.each do |state| %>
         <td><%= state.created_at.strftime("%m/%d/%Y") %></td>
         <td><%= state.description %></td>
         <td><%= state.ref_id %></td>
