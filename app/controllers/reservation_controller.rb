@@ -119,7 +119,6 @@ class ReservationController < ApplicationController
    	elsif @day > 10
       @get = @wallet.balance + @fare
       @admin_get = @admin.wallet - @fare
-      @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
       @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
         @wallet.with_lock do
           @wallet.balance = @get
@@ -139,6 +138,7 @@ class ReservationController < ApplicationController
             @statement.remaining_balance = @wallet.balance
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
+          @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
           @reservation.save
           @statement.save
    	      @payment.save
