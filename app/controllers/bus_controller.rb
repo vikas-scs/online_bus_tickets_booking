@@ -107,7 +107,7 @@ class BusController < ApplicationController
 		            @statement.ref_id = "res#{rand(7 ** 7)}" 
 		            bus_no = nil
 		            loop do
-		                bus_no = "#{rand(7 ** 7)}"
+		                bus_no = "#{rand(5 ** 5)}"
 		                @number = Reservation.find_by(bus_no: bus_no)
 		                if @number.nil?
 		                    @reservation.bus_no = bus_no
