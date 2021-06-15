@@ -24,7 +24,6 @@
     <table class= "myTable" style="width: 50%">
       <tr>
         <th>Ref Id</th>
-        <th>Bus Id</th>
         <th>no.of seats</th>
         <th>Fare</th>
         <th>Status</th>
@@ -34,8 +33,7 @@
       </tr>
       <tr>
         <% @reservations.each do |bus| %>
-          <td><%= bus.bus_no %></td>
-          <td><%= link_to "#{bus.bus_id}" , book_path(id: bus.bus_id) %></td>
+          <td><%= link_to "#{bus.bus_no}" , book_path(id: bus.bus_id) %></td>
           <td><%= bus.no_seats %></td>
           <td><%= bus.fare %></td>
           <td><%= bus.Reserve_status %></td>
