@@ -117,9 +117,7 @@ class ReservationController < ApplicationController
         end
       end
    	elsif @day > 10
-   	  @statement.refund_amount = @fare
       @get = @wallet.balance + @fare
-      @statement1.refund_amount = @fare
       @admin_get = @admin.wallet - @fare
       @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
       @wallet.transaction do                                    #locking the transaction for avoiding deadlocks
@@ -135,6 +133,7 @@ class ReservationController < ApplicationController
             @statement.no_seats = params[:select_seats].to_i
             @statement.seat_fare = @state.seat_fare
             @statement.refund_amount = @refunds
+            @statement.refund_amount = @fare
             @statement.user_id = @user.id
             @statement.ref_id = "ref#{rand(7 ** 7)}" 
             @statement.remaining_balance = @wallet.balance
@@ -160,6 +159,7 @@ class ReservationController < ApplicationController
             @statement1.description = "Giving refund amount to user"
             @statement1.no_seats = params[:select_seats].to_i
             @statement1.seat_fare = @state.seat_fare
+            @statement1.refund_amount = @fare
             @statement1.admin_id = @admin.id
             @statement1.remaining_balance = @admin.wallet
             @statement1.refund_amount = @refunds
