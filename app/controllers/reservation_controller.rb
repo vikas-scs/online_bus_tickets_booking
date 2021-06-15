@@ -124,8 +124,8 @@ class ReservationController < ApplicationController
         @wallet.with_lock do
           @wallet.balance = @get
           if @wallet.save!
-            @statement.remaining_balance = @wallet.balance
-            @statement = Statement.new                                       #creating a statement for adding refund amount to user
+            @statement = Statement.new 
+            @statement.remaining_balance = @wallet.balance                                      #creating a statement for adding refund amount to user
             @statement.bus_id = @bus.id
             @statement.transaction_type = "credit"
             @statement.user_id = @user.id
