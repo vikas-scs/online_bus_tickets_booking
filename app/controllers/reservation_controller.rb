@@ -139,7 +139,6 @@ class ReservationController < ApplicationController
             @statement.remaining_balance = @wallet.balance
           @reservation.fare = @reservation.fare - @fare
           @reservation.no_seats = @reservation.no_seats - params[:select_seats].to_i
-          @bus.available_seats = @bus.available_seats + params[:select_seats].to_i
           @reservation.save
           @statement.save
    	      @payment.save
